@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("chip8_emulator")
+project ("chip8_emulator" VERSION 1.0.0 LANGUAGES CXX)
 
 # Include sub-projects.
-add_subdirectory ("chip8_emulator")
+add_subdirectory ("src")
