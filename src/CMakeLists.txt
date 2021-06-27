@@ -9,7 +9,7 @@ add_executable (chip8_emulator "chip8_emulator.cpp" "chip8_emulator.h" "arch/gra
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	target_compile_options(chip8_emulator PUBLIC -Wall -Wpedantic -Wextra -Werror)
 elseif(MSVC)
-	target_compile_options(chip8_emulator PUBLIC /Wall /W4 /WX)
+	target_compile_options(chip8_emulator PUBLIC /Wall /W4 /WX /external:anglebrackets /external:W0)
 endif()
 
 target_compile_features(chip8_emulator PUBLIC cxx_std_20)
