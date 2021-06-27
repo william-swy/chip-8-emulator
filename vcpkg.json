@@ -1,0 +1,7 @@
+{
+    "name": "chip8emulator",
+    "version-string": "0.1.0",
+    "dependencies": [
+        "gtest"
+    ]
+}

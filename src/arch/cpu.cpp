@@ -48,6 +48,8 @@ void arch::CPU::decode_execute(Memory& mem) {
     case 0x9000:
       break;
     case 0xA000:
+      // Of form ANNN. Stores memory address NNN in index register
+
       break;
     case 0xB000:
       break;
@@ -60,6 +62,20 @@ void arch::CPU::decode_execute(Memory& mem) {
     case 0xF000:
       break;
     default:
-      break;
+      throw InvalidOpCode();
   }
 }
+
+unsigned char arch::CPU::get_general_reg(size_t reg_id) const {
+  if (reg_id >= num_general_reg) {
+    throw InvalidRegisterID();
+  } else {
+    return general_reg[reg_id];
+  }
+}
+
+unsigned short arch::CPU::get_index_reg() const { return index_reg; }
+
+unsigned short arch::CPU::get_pc_reg() const { return pc_reg; }
+
+unsigned short arch::CPU::get_sp_reg() const { return sp_reg; }
