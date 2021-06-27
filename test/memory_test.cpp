@@ -50,12 +50,19 @@ TEST(memory_test, set_get_diff_address_many_times) {
 
   constexpr size_t size = 10;
   // First element of tuple is address and second element of tuple is the value inserted at the
-  // address.
+  // address. Somewhat cursed just to get compiler to be silent about tuple type conversion from
+  // constructor.
   constexpr std::array<std::tuple<unsigned short, unsigned char>, size> address_values
-      = {std::make_tuple(150, 0x20), std::make_tuple(200, 0x30), std::make_tuple(250, 0x40),
-         std::make_tuple(300, 0x50), std::make_tuple(350, 0x60), std::make_tuple(400, 0x70),
-         std::make_tuple(450, 0x80), std::make_tuple(500, 0x90), std::make_tuple(550, 0xA0),
-         std::make_tuple(600, 0xB0)};
+      = {std::make_tuple(static_cast<unsigned short>(150), static_cast<unsigned char>(0x20)),
+         std::make_tuple(static_cast<unsigned short>(200), static_cast<unsigned char>(0x30)),
+         std::make_tuple(static_cast<unsigned short>(250), static_cast<unsigned char>(0x40)),
+         std::make_tuple(static_cast<unsigned short>(300), static_cast<unsigned char>(0x50)),
+         std::make_tuple(static_cast<unsigned short>(350), static_cast<unsigned char>(0x60)),
+         std::make_tuple(static_cast<unsigned short>(400), static_cast<unsigned char>(0x70)),
+         std::make_tuple(static_cast<unsigned short>(450), static_cast<unsigned char>(0x80)),
+         std::make_tuple(static_cast<unsigned short>(500), static_cast<unsigned char>(0x90)),
+         std::make_tuple(static_cast<unsigned short>(550), static_cast<unsigned char>(0xA0)),
+         std::make_tuple(static_cast<unsigned short>(600), static_cast<unsigned char>(0xB0))};
 
   for (const auto& value : address_values) {
     const auto& [test_address, expected_val] = value;
@@ -117,8 +124,9 @@ TEST(memory_test, set_get_many_random_indicies) {
   constexpr size_t num_elem = 1000;
   std::array<std::tuple<unsigned short, unsigned char>, num_elem> address_vals = {};
 
-  for (auto idx = 0; idx < address_vals.size(); idx++) {
-    address_vals[idx] = std::make_tuple(random_address(gen), random_value(gen));
+  for (size_t idx = 0; idx < address_vals.size(); idx++) {
+    address_vals[idx] = std::make_tuple(static_cast<unsigned short>(random_address(gen)),
+                                        static_cast<unsigned char>(random_value(gen)));
   }
 
   arch::Memory test_mem;
@@ -162,7 +170,7 @@ TEST(memory_test, fail_get_many_random_indicies_out_of_bounds) {
   int count = 0;
   constexpr int iterations = 1000;
   while (count < iterations) {
-    const unsigned short test_address = random_address(gen);
+    const auto test_address = static_cast<unsigned short>(random_address(gen));
 
     try {
       const unsigned char result = test_mem.get_value(test_address);
@@ -197,7 +205,7 @@ TEST(memory_test, fail_set_many_random_indicies_out_of_bounds) {
   int count = 0;
   constexpr int iterations = 1000;
   while (count < iterations) {
-    const unsigned short test_address = random_address(gen);
+    const auto test_address = static_cast<unsigned short>(random_address(gen));
 
     try {
       test_mem.set_value(test_address, 0x10);

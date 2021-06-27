@@ -7,10 +7,11 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
+set(TEST_SOURCES "memory_test.cpp" "cpu_test.cpp")
+
 add_executable(
 	chip8_emulator_tests
-	memory_test.cpp
-	"${CMAKE_SOURCE_DIR}/src/arch/memory.cpp"
+	${TEST_SOURCES}
 )
 
 target_include_directories(
@@ -25,6 +26,7 @@ target_link_libraries(
 	PRIVATE
 	GTest::gtest
 	GTest::gtest_main
+	Arch
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")

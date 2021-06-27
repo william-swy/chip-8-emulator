@@ -13,3 +13,23 @@ elseif(MSVC)
 endif()
 
 target_compile_features(chip8_emulator PUBLIC cxx_std_20)
+
+set(ARCH_HEADERS "arch/cpu.h" "arch/graphics.h" "arch/keypad.h" "arch/memory.h")
+set(ARCH_SOURCES "arch/cpu.cpp" "arch/memory.cpp")
+
+add_library(Arch ${ARCH_HEADERS} ${ARCH_SOURCES})
+target_compile_features(Arch PUBLIC cxx_std_20)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+	target_compile_options(Arch PUBLIC -Wall -Wpedantic -Wextra -Werror)
+elseif(MSVC)
+	target_compile_options(
+		Arch 
+		PUBLIC 
+		/external:anglebrackets 
+		/external:W0 
+		/Wall 
+		/W4 
+		/wd5045
+	)
+endif()

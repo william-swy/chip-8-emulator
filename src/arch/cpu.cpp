@@ -4,7 +4,7 @@
 
 arch::CPU::CPU() {
   index_reg = 0;
-  pc_reg = 0x200;
+  pc_reg = pc_start_value;
   sp_reg = 0;
 
   general_reg = {};
@@ -17,11 +17,12 @@ arch::CPU::CPU() {
 void arch::CPU::fetch(Memory& mem) {
   // Instructions are 2 bytes, hence need to get current program counter and the next address to
   // build opcode. It is also big endian, hence mem[PC] represents the left most value and mem[PC+1]
-  // represents the right most value.
+  // represents the right most value. Will throw a InvalidMemoryAddress exception if PC holds a
+  // value that is either at the greatest memory address or greater.
 
-  unsigned char left_most = mem.get_value(pc_reg);
-  unsigned char right_most = mem.get_value(pc_reg + 1);
-  curr_opcode = left_most << 8 | right_most;
+  const auto left_most = static_cast<unsigned>(mem.get_value(pc_reg));
+  const auto right_most = static_cast<unsigned>(mem.get_value(pc_reg + 1));
+  curr_opcode = static_cast<unsigned short>(left_most << 8 | right_most);
 }
 
 void arch::CPU::decode_execute(Memory& mem) {
@@ -62,6 +63,7 @@ void arch::CPU::decode_execute(Memory& mem) {
     case 0xF000:
       break;
     default:
+        // This is actually technically impossible to reach
       throw InvalidOpCode();
   }
 }
@@ -73,9 +75,3 @@ unsigned char arch::CPU::get_general_reg(size_t reg_id) const {
     return general_reg[reg_id];
   }
 }
-
-unsigned short arch::CPU::get_index_reg() const { return index_reg; }
-
-unsigned short arch::CPU::get_pc_reg() const { return pc_reg; }
-
-unsigned short arch::CPU::get_sp_reg() const { return sp_reg; }
