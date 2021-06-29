@@ -23,9 +23,10 @@ void arch::CPU::fetch(Memory& mem) {
   const auto left_most = static_cast<unsigned>(mem.get_value(pc_reg));
   const auto right_most = static_cast<unsigned>(mem.get_value(pc_reg + 1));
   curr_opcode = static_cast<unsigned short>(left_most << 8 | right_most);
+  pc_reg += 2;
 }
 
-void arch::CPU::decode_execute(Memory& mem) {
+void arch::CPU::decode_execute(Memory&) {
   // Parse out first 4 bits
   switch (curr_opcode & 0xF000) {
     case 0x0000:
@@ -50,9 +51,14 @@ void arch::CPU::decode_execute(Memory& mem) {
       break;
     case 0xA000:
       // Of form ANNN. Stores memory address NNN in index register
-
+      index_reg = static_cast<unsigned short>(curr_opcode & 0x0FFF);
       break;
     case 0xB000:
+      // Of form BNNN. Jump to address NNN + value in register 0
+      {
+        const auto jump_offset = static_cast<unsigned short>(curr_opcode & 0x0FFF);
+        pc_reg = static_cast<unsigned short>(jump_offset + general_reg[0]);
+      }
       break;
     case 0xC000:
       break;
@@ -63,8 +69,8 @@ void arch::CPU::decode_execute(Memory& mem) {
     case 0xF000:
       break;
     default:
-        // This is actually technically impossible to reach
-      throw InvalidOpCode();
+      // This is actually technically impossible to reach
+      throw InvalidInstruction();
   }
 }
 
@@ -75,3 +81,25 @@ unsigned char arch::CPU::get_general_reg(size_t reg_id) const {
     return general_reg[reg_id];
   }
 }
+
+void arch::CPU::set_general_reg(size_t reg_idx, unsigned char value) {
+  if (reg_idx >= num_general_reg) {
+    throw InvalidRegisterID();
+  } else {
+    general_reg[reg_idx] = value;
+  }
+}
+
+unsigned short arch::CPU::get_stack_pointer() const { return sp_reg; }
+
+void arch::CPU::set_stack_pointer(unsigned short value) {
+  if (value >= stack_size) {
+    throw InvalidStackPointerValue();
+  } else {
+    sp_reg = value;
+  }
+}
+
+unsigned short arch::CPU::get_stack() const { return stack[sp_reg]; }
+
+void arch::CPU::set_stack(unsigned short value) { stack[sp_reg] = value; }
