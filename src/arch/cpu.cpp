@@ -30,24 +30,38 @@ void arch::CPU::decode_execute(Memory&) {
   // Parse out first 4 bits
   switch (curr_opcode & 0xF000) {
     case 0x0000:
+      // TODO
       break;
     case 0x1000:
+      // Of form 1NNN. Jumps to address NNN
+      {
+        const auto address = static_cast<unsigned short>(curr_opcode & 0x0FFF);
+        pc_reg = address;
+      }
       break;
     case 0x2000:
+      // TODO
       break;
     case 0x3000:
+      // TODO
       break;
     case 0x4000:
+      // TODO
       break;
     case 0x5000:
+      // TODO
       break;
     case 0x6000:
+      // TODO
       break;
     case 0x7000:
+      // TODO
       break;
     case 0x8000:
+      // TODO
       break;
     case 0x9000:
+      // TODO
       break;
     case 0xA000:
       // Of form ANNN. Stores memory address NNN in index register
@@ -61,12 +75,16 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0xC000:
+      // TODO
       break;
     case 0xD000:
+      // TODO
       break;
     case 0xE000:
+      // TODO
       break;
     case 0xF000:
+      // TODO
       break;
     default:
       // This is actually technically impossible to reach

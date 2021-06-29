@@ -101,3 +101,48 @@ TEST(cpu_opcode_test, execute_instruction_BNNN_many_times) {
     }
   }
 }
+
+TEST(cpu_opcode_test, execute_instruction_1NNN_once) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0xB123;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, 0x0123);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_1NNN_many_times) {
+  struct TestValues {
+    unsigned short opcode;
+    unsigned short expected_address;
+  };
+
+  constexpr std::array<TestValues, 10> input{{{0x1A12, 0x0A12},
+                                              {0x1E7F, 0x0E7F},
+                                              {0x134D, 0x034D},
+                                              {0x1AF8, 0x0AF8},
+                                              {0x1111, 0x0111},
+                                              {0x1010, 0x0010},
+                                              {0x1FFF, 0x0FFF},
+                                              {0x1CDE, 0x0CDE},
+                                              {0x15F2, 0x05F2},
+                                              {0x1ABC, 0x0ABC}}};
+
+  arch::CPU cpu;
+  arch::Memory mem;
+
+  for (const auto& val : input) {
+    try {
+      cpu.curr_opcode = val.opcode;
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.pc_reg, val.expected_address);
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    }
+  }
+}
