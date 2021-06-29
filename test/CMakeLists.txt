@@ -7,18 +7,17 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-set(TEST_SOURCES "memory_test.cpp" "cpu_test.cpp")
+set(TEST_SOURCES "memory_test.cpp" "cpu_test.cpp" "opcode_test.cpp")
 
 add_executable(
 	chip8_emulator_tests
 	${TEST_SOURCES}
-)
+ )
 
 target_include_directories(
 	chip8_emulator_tests
 	PRIVATE
 	${GTEST_INCLUDE_DIRS}
-	"${CMAKE_SOURCE_DIR}/src"
 )
 
 target_link_libraries(

@@ -18,6 +18,7 @@ set(ARCH_HEADERS "arch/cpu.h" "arch/graphics.h" "arch/keypad.h" "arch/memory.h")
 set(ARCH_SOURCES "arch/cpu.cpp" "arch/memory.cpp")
 
 add_library(Arch ${ARCH_HEADERS} ${ARCH_SOURCES})
+target_include_directories(Arch PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(Arch PUBLIC cxx_std_20)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")

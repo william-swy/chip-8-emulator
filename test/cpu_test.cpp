@@ -20,7 +20,7 @@ TEST(cpu_test, get_first_general_reg) {
 TEST(cpu_test, get_last_general_reg) {
   const arch::CPU cpu;
   try {
-    const auto curr_reg = cpu.get_general_reg(0xE);
+    const auto curr_reg = cpu.get_general_reg(0xF);
     EXPECT_EQ(curr_reg, 0);
   } catch (const arch::InvalidRegisterID&) {
     FAIL() << "InvalidRegisterID exception should not have been thrown\n";
@@ -32,7 +32,7 @@ TEST(cpu_test, get_random_general_reg) {
   const std::string seed_str("Definately a random string");
   std::seed_seq seed(seed_str.begin(), seed_str.end());
   std::mt19937 gen(seed);
-  std::uniform_int_distribution<> random_reg(0, 0xE);
+  std::uniform_int_distribution<> random_reg(0, 0xF);
 
   int curr_iter = 0;
   constexpr int max_iter = 10;
@@ -53,6 +53,65 @@ TEST(cpu_test, fail_get_last_reg_out_of_bounds) {
   const arch::CPU cpu;
   try {
     const auto curr_reg = cpu.get_general_reg(arch::num_general_reg);
+    FAIL() << "InvalidRegisterID exception should have been thrown\n";
+  } catch (const arch::InvalidRegisterID&) {
+    SUCCEED();
+  }
+}
+
+TEST(cpu_test, set_first_general_reg) {
+  arch::CPU cpu;
+  try {
+    constexpr unsigned char expected_val = 0xF1;
+    cpu.set_general_reg(0, expected_val);
+    const auto curr_reg = cpu.get_general_reg(0);
+    EXPECT_EQ(curr_reg, expected_val);
+  } catch (const arch::InvalidRegisterID&) {
+    FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_test, set_last_general_reg) {
+  arch::CPU cpu;
+  try {
+    constexpr unsigned char expected_val = 0xA3;
+    cpu.set_general_reg(0xF, expected_val);
+    const auto curr_reg = cpu.get_general_reg(0xF);
+    EXPECT_EQ(curr_reg, expected_val);
+  } catch (const arch::InvalidRegisterID&) {
+    FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_test, set_random_general_reg) {
+  arch::CPU cpu;
+  const std::string seed_str("Definately a random string");
+  std::seed_seq seed(seed_str.begin(), seed_str.end());
+  std::mt19937 gen(seed);
+  std::uniform_int_distribution<> random_reg(0, 0xE);
+  std::uniform_int_distribution<> random_val(0, 0xFF);
+
+  int curr_iter = 0;
+  constexpr int max_iter = 10;
+
+  while (curr_iter < max_iter) {
+    const auto curr_reg = static_cast<size_t>(random_reg(gen));
+    const auto curr_val = static_cast<unsigned char>(random_val(gen));
+    try {
+      cpu.set_general_reg(curr_reg, curr_val);
+      const auto result = cpu.get_general_reg(curr_reg);
+      EXPECT_EQ(result, curr_val);
+    } catch (const arch::InvalidRegisterID&) {
+      FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+    }
+    curr_iter++;
+  }
+}
+
+TEST(cpu_test, fail_set_last_reg_out_of_bounds) {
+  arch::CPU cpu;
+  try {
+    cpu.set_general_reg(arch::num_general_reg, 0x11);
     FAIL() << "InvalidRegisterID exception should have been thrown\n";
   } catch (const arch::InvalidRegisterID&) {
     SUCCEED();
@@ -205,97 +264,32 @@ TEST(cpu_test, fetch_many_random_times) {
   }
 }
 
-TEST(cpu_test, execute_instruction_ANNN_once) {
-  arch::CPU cpu{};
-  arch::Memory mem{};
-
-  cpu.curr_opcode = 0xA123;
-
-  try {
-    cpu.decode_execute(mem);
-    EXPECT_EQ(cpu.index_reg, 0x0123);
-  } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
-  }
-}
-
-TEST(cpu_test, execute_instruction_ANNN_many_times) {
-  arch::CPU cpu{};
-  arch::Memory mem{};
-
-  struct OpcodeExpected {
-    unsigned short opcode;
-    unsigned short expected;
-  };
-
-  constexpr size_t size = 10;
-  constexpr std::array<OpcodeExpected, size> opcodes{{{0xAA3D, 0x0A3D},
-                                                      {0xA156, 0x0156},
-                                                      {0xAABC, 0x0ABC},
-                                                      {0xABBB, 0x0BBB},
-                                                      {0xAC12, 0x0C12},
-                                                      {0xA980, 0x0980},
-                                                      {0xAE46, 0x0E46},
-                                                      {0xAF2F, 0x0F2F},
-                                                      {0xA45A, 0x045A},
-                                                      {0xAD37, 0x0D37}}};
-
-  for (const auto& val : opcodes) {
-    cpu.curr_opcode = val.opcode;
-    try {
-      cpu.decode_execute(mem);
-      EXPECT_EQ(cpu.index_reg, val.expected);
-    } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
-    }
-  }
-}
-
-TEST(cpu_test, execute_instruction_BNNN_once) {
+TEST(cpu_test, set_stack_pointer_smallest_val) {
   arch::CPU cpu;
-  arch::Memory mem;
-
-  cpu.set_general_reg(0, 0xF1);
-  cpu.curr_opcode = 0xB234;
-
   try {
-    cpu.decode_execute(mem);
-    EXPECT_EQ(cpu.pc_reg, 0x0234 + 0xF1);
-  } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    cpu.set_stack_pointer(0);
+    SUCCEED();
+  } catch (const arch::InvalidStackPointerValue&) {
+    FAIL() << "InvalidStackPointerValue exception should not have been thrown.\n";
   }
 }
 
-TEST(cpu_test, execute_instruction_BNNN_many_times) {
-  struct TestValues {
-    unsigned char reg_v0;
-    unsigned short opcode;
-    unsigned short expected_address;
-  };
+TEST(cpu_test, set_stack_pointer_biggest_val) {
+  arch::CPU cpu;
+  try {
+    cpu.set_stack_pointer(arch::stack_size - 1);
+    SUCCEED();
+  } catch (const arch::InvalidStackPointerValue&) {
+    FAIL() << "InvalidStackPointerValue exception should not have been thrown.\n";
+  }
+}
 
-  constexpr std::array<TestValues, 10> input{{{0x12, 0xBF31, 0x0F31 + 0x12},
-                                              {0xE7, 0xB45A, 0x045A + 0xE7},
-                                              {0xBB, 0xB3EF, 0x03EF + 0xBB},
-                                              {0xF8, 0xB345, 0x0345 + 0xF8},
-                                              {0x42, 0xB809, 0x0809 + 0x42},
-                                              {0xA4, 0xB467, 0x0467 + 0xA4},
-                                              {0x60, 0xB4E8, 0x04E8 + 0x60},
-                                              {0x3C, 0xBCD1, 0x0CD1 + 0x3C},
-                                              {0xFF, 0xBE0F, 0x0E0F + 0xFF},
-                                              {0x55, 0xB39A, 0x039A + 0x55}}};
-
-  arch::CPU cpu{};
-  arch::Memory mem{};
-
-  for (const auto val : input) {
-    cpu.set_general_reg(0, val.reg_v0);
-    cpu.curr_opcode = val.opcode;
-
-    try {
-      cpu.decode_execute(mem);
-      EXPECT_EQ(cpu.pc_reg, val.expected_address);
-    } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
-    }
+TEST(cpu_test, set_stack_pointer_val_too_big) {
+  arch::CPU cpu;
+  try {
+    cpu.set_stack_pointer(arch::stack_size);
+    FAIL() << "InvalidStackPointerValue exception should have been thrown.\n";
+  } catch (const arch::InvalidStackPointerValue&) {
+    SUCCEED();
   }
 }
