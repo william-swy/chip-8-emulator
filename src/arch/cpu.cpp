@@ -54,7 +54,15 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0x4000:
-      // TODO
+      // Of form 4XNN. Skips the next instruction if the value of register X does not equal NN
+      {
+        // Mask to get the register id and bitshift right 8 to remove the two trailing zeros.
+        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto value = static_cast<unsigned char>(curr_opcode & 0x00FF);
+        if (general_reg[reg_id] != value) {
+          pc_reg += 2;
+        }
+      }
       break;
     case 0x5000:
       // TODO
