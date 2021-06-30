@@ -146,3 +146,75 @@ TEST(cpu_opcode_test, execute_instruction_1NNN_many_times) {
     }
   }
 }
+
+TEST(cpu_opcode_test, execute_instruction_3XNN_once_no_skip) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.pc_reg = 0x3460;
+  cpu.set_general_reg(0x0, 0x11);
+  cpu.curr_opcode = 0x3012;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, 0x3460);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_3XNN_once_skip) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.pc_reg = 0x3460;
+  cpu.set_general_reg(0x4, 0x25);
+  cpu.curr_opcode = 0x3425;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, 0x3460 + 2);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_3XNN_many_assorted_jumps) {
+  struct TestInputs {
+    unsigned short start_pc;
+    unsigned short opcode;
+    size_t register_id;
+    unsigned char register_value;
+    bool should_skip;
+  };
+
+  constexpr std::array<TestInputs, 10> input_vals{{{0x2100, 0x3145, 0x0, 0x12, false},
+                                                   {0x3456, 0x33FF, 0x3, 0xFF, true},
+                                                   {0xF123, 0x3A11, 0xA, 0x4E, false},
+                                                   {0xABCD, 0x3C3C, 0x1, 0x11, false},
+                                                   {0x78AC, 0x35AA, 0x5, 0xAA, true},
+                                                   {0xB78A, 0x39F1, 0x9, 0xF1, true},
+                                                   {0x74B3, 0x3BB1, 0xB, 0xB1, true},
+                                                   {0x5189, 0x3743, 0x7, 0xA6, false},
+                                                   {0xAB80, 0x385A, 0x7, 0x5A, false},
+                                                   {0x6520, 0x3871, 0x0, 0x71, false}}};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : input_vals) {
+    cpu.pc_reg = val.start_pc;
+    cpu.curr_opcode = val.opcode;
+    cpu.set_general_reg(val.register_id, val.register_value);
+    try {
+      cpu.decode_execute(mem);
+      if (val.should_skip) {
+        EXPECT_EQ(cpu.pc_reg, val.start_pc + 2);
+      } else {
+        EXPECT_EQ(cpu.pc_reg, val.start_pc);
+      }
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    }
+  }
+}
