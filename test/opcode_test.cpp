@@ -431,3 +431,55 @@ TEST(cpu_opcode_test, execute_instruction_6XNN_many_times) {
     }
   }
 }
+
+TEST(cpu_opcode_test, execute_instruction_7XNN_once) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x70F1;
+  cpu.set_general_reg(0x0, 0x10);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x0), static_cast<unsigned char>(0x10+0xF1));
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_7XNN_many_times) {
+  struct TestInputs {
+    unsigned short opcode;
+    size_t reg_id;
+    unsigned char initial_val;
+    unsigned char add_value;
+  };
+
+  constexpr std::array<TestInputs, 10> inputs{{
+      {0x71FF, 0x1, 0xAB, 0xFF},
+      {0x7212, 0x2, 0x11, 0x12},
+      {0x73AC, 0x3, 0xC0, 0xAC},
+      {0x7430, 0x4, 0x71, 0x30},
+      {0x759A, 0x5, 0x89, 0x9A},
+      {0x7600, 0x6, 0x00, 0x00},
+      {0x7ABF, 0xA, 0x12, 0xBF},
+      {0x7BD1, 0xB, 0x34, 0xD1},
+      {0x7C05, 0xC, 0x78, 0x05},
+      {0x7D5A, 0xD, 0xEA, 0x5A},
+  }};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : inputs) {
+    cpu.curr_opcode = val.opcode;
+
+    try {
+      cpu.set_general_reg(val.reg_id, val.initial_val);
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_id), static_cast<unsigned char>(val.initial_val + val.add_value));
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    }
+  }
+}

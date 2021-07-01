@@ -87,7 +87,12 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0x7000:
-      // TODO
+      // Of form 7XNN. Adds the value of NN in the register X
+      {
+        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto value = static_cast<unsigned char>(curr_opcode & 0x00FF);
+        general_reg[reg_id] += value;
+      }
       break;
     case 0x8000:
       // TODO
