@@ -12,6 +12,11 @@ arch::CPU::CPU() {
   sound_timer_reg = 0;
   stack = {};
   curr_opcode = 0;
+
+  const std::string seed_str("RNG seed string");
+  const std::seed_seq seed(seed_str.begin(), seed_str.end());
+  gen = std::mt19937(seed);
+  rng = std::uniform_int_distribution<>(0x00, 0xFF);
 }
 
 void arch::CPU::fetch(Memory& mem) {
@@ -122,7 +127,15 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0xC000:
-      // TODO
+      // Of form CXNN. Generates a random number from 0 to 255 and masks with NN and stores in
+      // register X
+      {
+        const auto random_num = static_cast<unsigned>(rng(gen));
+        const auto mask = static_cast<unsigned>(curr_opcode & 0x00FF);
+        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+
+        general_reg[reg_id] = static_cast<unsigned char>(random_num & mask);
+      }
       break;
     case 0xD000:
       // TODO

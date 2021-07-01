@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <random>
 
 #include "arch/cpu.h"
 #include "arch/memory.h"
@@ -441,7 +442,7 @@ TEST(cpu_opcode_test, execute_instruction_7XNN_once) {
 
   try {
     cpu.decode_execute(mem);
-    EXPECT_EQ(cpu.get_general_reg(0x0), static_cast<unsigned char>(0x10+0xF1));
+    EXPECT_EQ(cpu.get_general_reg(0x0), static_cast<unsigned char>(0x10 + 0xF1));
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
   }
@@ -477,10 +478,25 @@ TEST(cpu_opcode_test, execute_instruction_7XNN_many_times) {
     try {
       cpu.set_general_reg(val.reg_id, val.initial_val);
       cpu.decode_execute(mem);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_id), static_cast<unsigned char>(val.initial_val + val.add_value));
+      EXPECT_EQ(cpu.get_general_reg(val.reg_id),
+                static_cast<unsigned char>(val.initial_val + val.add_value));
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown.\n";
     }
+  }
+}
+
+TEST(cpu_opcode_test, invalid_9000_instruction) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x93F1;
+
+  try {
+    cpu.decode_execute(mem);
+    FAIL() << "InvalidInstruction exception should have been thrown.\n";
+  } catch (const arch::InvalidInstruction&) {
+    SUCCEED();
   }
 }
 
@@ -555,6 +571,62 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_many_assorted_skips) {
       } else {
         EXPECT_EQ(cpu.pc_reg, val.curr_pc);
       }
+
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    }
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_CXNN_once) {
+  // We can mimic the random number generator
+  const std::string seed_str("RNG seed string");
+  const std::seed_seq seed(seed_str.begin(), seed_str.end());
+  std::mt19937 gen(seed);
+  std::uniform_int_distribution<> rng(0x00, 0xFF);
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0xC1FF;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(1), static_cast<unsigned char>(rng(gen) & 0xFF));
+
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_CXNN_many_times) {
+  // We can mimic the random number generator
+  const std::string seed_str("RNG seed string");
+  const std::seed_seq seed(seed_str.begin(), seed_str.end());
+  std::mt19937 gen(seed);
+  std::uniform_int_distribution<> rng(0x00, 0xFF);
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  struct TestInputs {
+    unsigned short opcode;
+    size_t reg_id;
+    unsigned char mask;
+  };
+
+  constexpr std::array<TestInputs, 5> inputs{{{0xC312, 0x3, 0x12},
+                                              {0xC6F1, 0x6, 0xF1},
+                                              {0xC94E, 0x9, 0x4E},
+                                              {0xCC52, 0xC, 0x52},
+                                              {0xCF90, 0xF, 0x90}}};
+
+  for (const auto& val : inputs) {
+    cpu.curr_opcode = val.opcode;
+
+    try {
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_id), static_cast<unsigned char>(rng(gen) & val.mask));
 
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown.\n";

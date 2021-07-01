@@ -3,7 +3,9 @@
 #  define CHIP8EMULATOR_ARCH_CPU_H_
 
 #  include <array>
+#  include <random>
 #  include <stdexcept>
+#  include <string>
 
 #  include "memory.h"
 
@@ -52,6 +54,10 @@ namespace arch {
     unsigned short sp_reg;  // Stack pointer register 16 bit
     // Stack for storing return addresses
     std::array<unsigned short, stack_size> stack;  // Meant to store return addresses
+
+    // RNG
+    std::mt19937 gen;
+    std::uniform_int_distribution<> rng;
   };
 
   class InvalidRegisterID : public std::exception {
