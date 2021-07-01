@@ -98,7 +98,17 @@ void arch::CPU::decode_execute(Memory&) {
       // TODO
       break;
     case 0x9000:
-      // TODO
+      // Must be of form 9XY0. Skips the next instruction if the value of register X does not equal
+      // the value of register Y. The right most value must be a 0.
+      if ((curr_opcode & 0x00F) != 0) {
+        throw InvalidInstruction();
+      } else {
+        const auto reg_X = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_Y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+        if (general_reg[reg_X] != general_reg[reg_Y]) {
+          pc_reg += 2;
+        }
+      }
       break;
     case 0xA000:
       // Of form ANNN. Stores memory address NNN in index register
