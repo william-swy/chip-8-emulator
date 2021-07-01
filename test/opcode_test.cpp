@@ -376,6 +376,56 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_many_assorted_skips) {
       } else {
         EXPECT_EQ(cpu.pc_reg, val.curr_pc);
       }
+
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    }
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_6XNN_once) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x6123;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x1), 0x23);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_6XNN_many_times) {
+  struct TestInputs {
+    unsigned short opcode;
+    size_t reg_id;
+    unsigned char value;
+  };
+
+  constexpr std::array<TestInputs, 10> inputs{{
+      {0x61FF, 0x1, 0xFF},
+      {0x6212, 0x2, 0x12},
+      {0x63AC, 0x3, 0xAC},
+      {0x6430, 0x4, 0x30},
+      {0x659A, 0x5, 0x9A},
+      {0x6600, 0x6, 0x00},
+      {0x6ABF, 0xA, 0xBF},
+      {0x6BD1, 0xB, 0xD1},
+      {0x6C05, 0xC, 0x05},
+      {0x6D5A, 0xD, 0x5A},
+  }};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : inputs) {
+    cpu.curr_opcode = val.opcode;
+
+    try {
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_id), val.value);
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown.\n";
     }
