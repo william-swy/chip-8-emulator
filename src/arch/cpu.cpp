@@ -36,6 +36,17 @@ void arch::CPU::decode_execute(Memory&) {
   switch (curr_opcode & 0xF000) {
     case 0x0000:
       // TODO
+      switch (curr_opcode) {
+        case 0x00E0:
+          break;
+        case 0x00EE:
+          // Set program counter to top of stack. Decrease stack pointer by 1.
+          pc_reg = stack[sp_reg];
+          sp_reg--;
+          break;
+        default:
+          throw InvalidInstruction();
+      }
       break;
     case 0x1000:
       // Of form 1NNN. Jumps to address NNN
@@ -45,7 +56,14 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0x2000:
-      // TODO
+      // Of form 2NNN. Increment stack pointer and store current program counter on stack. Stack
+      // pointer is then set to address NNN
+      {
+        const auto address = static_cast<unsigned short>(curr_opcode & 0x0FFF);
+        sp_reg++;
+        stack[sp_reg] = pc_reg;
+        pc_reg = address;
+      }
       break;
     case 0x3000:
       // Of form 3XNN. Skips the next instruction if value of register X equals NN
@@ -100,7 +118,123 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0x8000:
-      // TODO
+      switch (curr_opcode & 0x000F) {
+        case 0x0000:
+          // Of form 8XY0. Stores the value of register Y in register X
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            general_reg[reg_x] = general_reg[reg_y];
+          }
+          break;
+        case 0x0001:
+          // Of form 8XY1. Stores the result of register X bitwise OR register Y in register X
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            general_reg[reg_x] = static_cast<unsigned char>(static_cast<int>(general_reg[reg_x])
+                                                            | static_cast<int>(general_reg[reg_y]));
+          }
+          break;
+        case 0x0002:
+          // Of form 8XY2. Stores the result of register X bitwise AND register Y in register X
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            general_reg[reg_x] = static_cast<unsigned char>(static_cast<int>(general_reg[reg_x])
+                                                            & static_cast<int>(general_reg[reg_y]));
+          }
+          break;
+        case 0x0003:
+          // Of form 8XY3. Stores the result of register X bitwise XOR register Y in register X
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            general_reg[reg_x] = static_cast<unsigned char>(static_cast<int>(general_reg[reg_x])
+                                                            ^ static_cast<int>(general_reg[reg_y]));
+          }
+          break;
+        case 0x0004:
+          // Of form 8XY4. Adds the value in register Y to the value in register X. If there is an
+          // overflow, register F is set to 0x01. Else register F is set to 0x0.
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto sum = static_cast<unsigned char>(general_reg[reg_x] + general_reg[reg_y]);
+
+            if (sum < general_reg[reg_x]) {
+              general_reg[0xF] = 0x01;
+            } else {
+              general_reg[0xF] = 0x00;
+            }
+
+            general_reg[reg_x] = sum;
+          }
+          break;
+        case 0x0005:
+          // Of form 8XY5. Adds the value. Subtracts the value of register Y from register X. Set
+          // register F to 0 if borrow occurs, otherwise set register F to 1.
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            if (general_reg[reg_x] >= general_reg[reg_y]) {
+              general_reg[0xF] = 0x01;
+            } else {
+              general_reg[0xF] = 0x00;
+            }
+
+            general_reg[reg_x] -= general_reg[reg_y];
+          }
+          break;
+        case 0x0006:
+          // Of form 8XY6. Stores the value of register Y shifted right one bit in register X.
+          // Register F holds the least significant bit of register Y before the shift.
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            general_reg[0xF] = static_cast<unsigned char>(general_reg[reg_y] & 0b00000001);
+
+            general_reg[reg_x] = static_cast<unsigned char>(general_reg[reg_y] >> 1);
+          }
+          break;
+        case 0x0007:
+          // Of form 8XY7. Stores the value of register Y subtracted by the value of register X in
+          // register X. If there is a borrow, register F is set to 0. Else register F is set to 1.
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto diff = static_cast<unsigned char>(general_reg[reg_y] - general_reg[reg_x]);
+
+            if (general_reg[reg_y] >= general_reg[reg_x]) {
+              general_reg[0xF] = 0x01;
+            } else {
+              general_reg[0xF] = 0x00;
+            }
+
+            general_reg[reg_x] = diff;
+          }
+          break;
+        case 0x000E:
+          // Of form 8XYE. Stores the value of register Y shifted left one bit in register X. Stores
+          // the most signficant bit of register Y before the shift in register F.
+          {
+            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+
+            general_reg[0xF] = static_cast<unsigned char>((general_reg[reg_y] & 0b10000000) >> 7);
+
+            general_reg[reg_x] = static_cast<unsigned char>(general_reg[reg_y] << 1);
+          }
+          break;
+        default:
+          throw InvalidInstruction();
+      }
       break;
     case 0x9000:
       // Must be of form 9XY0. Skips the next instruction if the value of register X does not equal
@@ -170,7 +304,7 @@ void arch::CPU::set_general_reg(size_t reg_idx, unsigned char value) {
 
 unsigned short arch::CPU::get_stack_pointer() const { return sp_reg; }
 
-void arch::CPU::set_stack_pointer(unsigned short value) {
+void arch::CPU::set_stack_pointer(unsigned char value) {
   if (value >= stack_size) {
     throw InvalidStackPointerValue();
   } else {

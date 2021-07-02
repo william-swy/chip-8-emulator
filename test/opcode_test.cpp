@@ -633,3 +633,465 @@ TEST(cpu_opcode_test, execute_instruction_CXNN_many_times) {
     }
   }
 }
+
+TEST(cpu_opcode_test, execute_instruction_2NNN_once) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x24F2;
+  cpu.pc_reg = 0x200;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, 0x04F2);
+    EXPECT_EQ(cpu.get_stack_pointer(), 1);
+    EXPECT_EQ(cpu.get_stack(), 0x200);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
+  // Simulates starting in the main function which then calls foo1 which calls bar which then calls
+  // foo2
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  constexpr auto start_pc = 0x200;
+  constexpr auto call_foo1_opcode = 0x2400;
+
+  constexpr auto foo1_address = 0x400;
+  constexpr auto call_bar_opcode = 0x2F42;
+
+  constexpr auto bar_address = 0xF42;
+  constexpr auto call_foo2_opcode = 0x2112;
+
+  constexpr auto foo2_address = 0x112;
+
+  cpu.pc_reg = start_pc;
+  cpu.curr_opcode = call_foo1_opcode;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, foo1_address);
+    EXPECT_EQ(cpu.get_stack_pointer(), 1);
+    EXPECT_EQ(cpu.get_stack(), start_pc);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+
+  cpu.curr_opcode = call_bar_opcode;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, bar_address);
+    EXPECT_EQ(cpu.get_stack_pointer(), 2);
+    cpu.set_stack_pointer(1);
+    EXPECT_EQ(cpu.get_stack(), start_pc);
+    cpu.set_stack_pointer(2);
+    EXPECT_EQ(cpu.get_stack(), foo1_address);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+
+  cpu.curr_opcode = call_foo2_opcode;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, foo2_address);
+    EXPECT_EQ(cpu.get_stack_pointer(), 3);
+    cpu.set_stack_pointer(1);
+    EXPECT_EQ(cpu.get_stack(), start_pc);
+    cpu.set_stack_pointer(2);
+    EXPECT_EQ(cpu.get_stack(), foo1_address);
+    cpu.set_stack_pointer(3);
+    EXPECT_EQ(cpu.get_stack(), bar_address);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_00EE_once) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x00EE;
+
+  cpu.set_stack_pointer(1);
+  cpu.set_stack(0x1234);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, 0x1234);
+    EXPECT_EQ(cpu.get_stack_pointer(), 0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
+  // Aims to mock the returning from the call from main to foo1 to bar to foo2 i.e. foo2 returns to
+  // bar which returns to foo1 which returns to main.
+
+  constexpr auto opcode = 0x00EE;
+
+  constexpr auto main_return_address = 0x300;
+  constexpr auto foo1_return_adress = 0x412;
+  constexpr auto bar_return_adress = 0x350;
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.set_stack_pointer(1);
+  cpu.set_stack(main_return_address);
+  cpu.set_stack_pointer(2);
+  cpu.set_stack(foo1_return_adress);
+  cpu.set_stack_pointer(3);
+  cpu.set_stack(bar_return_adress);
+
+  cpu.curr_opcode = opcode;
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, bar_return_adress);
+    EXPECT_EQ(cpu.get_stack_pointer(), 2);
+    EXPECT_EQ(cpu.get_stack(), foo1_return_adress);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, foo1_return_adress);
+    EXPECT_EQ(cpu.get_stack_pointer(), 1);
+    EXPECT_EQ(cpu.get_stack(), main_return_address);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.pc_reg, main_return_address);
+    EXPECT_EQ(cpu.get_stack_pointer(), 0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY0_many_times) {
+  struct TestInput {
+    unsigned short opcode;
+    size_t reg_x;
+    size_t reg_y;
+    unsigned short reg_x_val;
+    unsigned short reg_y_val;
+  };
+
+  constexpr std::array<TestInput, 5> input{{{0x8120, 0x1, 0x2, 0x1, 0x2},
+                                            {0x8A30, 0xA, 0x3, 0xA, 0xE},
+                                            {0x8EF0, 0xE, 0xF, 0xF, 0xF},
+                                            {0x8900, 0x9, 0x0, 0x0, 0x5},
+                                            {0x8C30, 0xC, 0x3, 0x4, 0x8}}};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : input) {
+    cpu.curr_opcode = val.opcode;
+    cpu.set_general_reg(val.reg_x, val.reg_x_val);
+    cpu.set_general_reg(val.reg_y, val.reg_y_val);
+
+    try {
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_x), val.reg_y_val);
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    }
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY1_many_times) {
+  struct TestInput {
+    unsigned short opcode;
+    size_t reg_x;
+    size_t reg_y;
+    unsigned short reg_x_val;
+    unsigned short reg_y_val;
+  };
+
+  constexpr std::array<TestInput, 5> input{{{0x8121, 0x1, 0x2, 0x1, 0x2},
+                                            {0x8A31, 0xA, 0x3, 0xA, 0xE},
+                                            {0x8EF1, 0xE, 0xF, 0xF, 0xF},
+                                            {0x8901, 0x9, 0x0, 0x0, 0x5},
+                                            {0x8C31, 0xC, 0x3, 0x4, 0x8}}};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : input) {
+    cpu.curr_opcode = val.opcode;
+    cpu.set_general_reg(val.reg_x, val.reg_x_val);
+    cpu.set_general_reg(val.reg_y, val.reg_y_val);
+
+    try {
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_x),
+                static_cast<unsigned char>(val.reg_y_val | val.reg_x_val));
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    }
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY2_many_times) {
+  struct TestInput {
+    unsigned short opcode;
+    size_t reg_x;
+    size_t reg_y;
+    unsigned short reg_x_val;
+    unsigned short reg_y_val;
+  };
+
+  constexpr std::array<TestInput, 5> input{{{0x8122, 0x1, 0x2, 0x1, 0x2},
+                                            {0x8A32, 0xA, 0x3, 0xA, 0xE},
+                                            {0x8EF2, 0xE, 0xF, 0xF, 0xF},
+                                            {0x8902, 0x9, 0x0, 0x0, 0x5},
+                                            {0x8C32, 0xC, 0x3, 0x4, 0x8}}};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : input) {
+    cpu.curr_opcode = val.opcode;
+    cpu.set_general_reg(val.reg_x, val.reg_x_val);
+    cpu.set_general_reg(val.reg_y, val.reg_y_val);
+
+    try {
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_x),
+                static_cast<unsigned char>(val.reg_y_val & val.reg_x_val));
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    }
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY3_many_times) {
+  struct TestInput {
+    unsigned short opcode;
+    size_t reg_x;
+    size_t reg_y;
+    unsigned short reg_x_val;
+    unsigned short reg_y_val;
+  };
+
+  constexpr std::array<TestInput, 5> input{{{0x8123, 0x1, 0x2, 0x1, 0x2},
+                                            {0x8A33, 0xA, 0x3, 0xA, 0xE},
+                                            {0x8EF3, 0xE, 0xF, 0xF, 0xF},
+                                            {0x8903, 0x9, 0x0, 0x0, 0x5},
+                                            {0x8C33, 0xC, 0x3, 0x4, 0x8}}};
+
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  for (const auto& val : input) {
+    cpu.curr_opcode = val.opcode;
+    cpu.set_general_reg(val.reg_x, val.reg_x_val);
+    cpu.set_general_reg(val.reg_y, val.reg_y_val);
+
+    try {
+      cpu.decode_execute(mem);
+      EXPECT_EQ(cpu.get_general_reg(val.reg_x),
+                static_cast<unsigned char>(val.reg_y_val ^ val.reg_x_val));
+    } catch (const arch::InvalidInstruction&) {
+      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    }
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY4_no_overflow) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x8A14;
+
+  cpu.set_general_reg(0xA, 0x34);
+  cpu.set_general_reg(0x1, 0x12);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 + 0x12));
+    EXPECT_EQ(cpu.get_general_reg(0x1), 0x12);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY4_overflow) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x83C4;
+
+  cpu.set_general_reg(0x3, 0xFF);
+  cpu.set_general_reg(0xC, 0x11);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xFF + 0x11));
+    EXPECT_EQ(cpu.get_general_reg(0xC), 0x11);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY5_no_overflow) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x8A15;
+
+  cpu.set_general_reg(0xA, 0x34);
+  cpu.set_general_reg(0x1, 0x12);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 - 0x12));
+    EXPECT_EQ(cpu.get_general_reg(0x1), 0x12);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY5_overflow) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x83C5;
+
+  cpu.set_general_reg(0x3, 0xA1);
+  cpu.set_general_reg(0xC, 0xAB);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xA1 - 0xAB));
+    EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY6_rightmost_zero) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x8A16;
+
+  cpu.set_general_reg(0x1, 0x14);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0xA), 0xA);
+    EXPECT_EQ(cpu.get_general_reg(0x1), 0x14);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY5_rightmost_one) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x83C6;
+
+  cpu.set_general_reg(0xC, 0xAB);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x3), 0x55);
+    EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY7_no_overflow) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x8A17;
+
+  cpu.set_general_reg(0xA, 0x12);
+  cpu.set_general_reg(0x1, 0x34);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 - 0x12));
+    EXPECT_EQ(cpu.get_general_reg(0x1), 0x34);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XY7_overflow) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x83C7;
+
+  cpu.set_general_reg(0x3, 0xAB);
+  cpu.set_general_reg(0xC, 0xA1);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xA1 - 0xAB));
+    EXPECT_EQ(cpu.get_general_reg(0xC), 0xA1);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_zero) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x8A1E;
+
+  cpu.set_general_reg(0x1, 0x14);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0xA), 0x28);
+    EXPECT_EQ(cpu.get_general_reg(0x1), 0x14);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}
+
+TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_one) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+
+  cpu.curr_opcode = 0x83CE;
+
+  cpu.set_general_reg(0xC, 0xAB);
+
+  try {
+    cpu.decode_execute(mem);
+    EXPECT_EQ(cpu.get_general_reg(0x3), 0x56);
+    EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
+    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+  } catch (const arch::InvalidInstruction&) {
+    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+  }
+}

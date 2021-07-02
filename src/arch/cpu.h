@@ -33,7 +33,7 @@ namespace arch {
 
     [[nodiscard]] unsigned short get_stack_pointer() const;
 
-    void set_stack_pointer(unsigned short value);
+    void set_stack_pointer(unsigned char value);
 
     [[nodiscard]] unsigned short get_stack() const;
 
@@ -51,9 +51,9 @@ namespace arch {
     // Registers
     std::array<unsigned char, num_general_reg> general_reg;  // General purpose registers 16 8 bit
 
-    unsigned short sp_reg;  // Stack pointer register 16 bit
+    unsigned char sp_reg;  // Stack pointer register 16 bit
     // Stack for storing return addresses
-    std::array<unsigned short, stack_size> stack;  // Meant to store return addresses
+    std::array<unsigned short, stack_size+1> stack;  // Meant to store return addresses
 
     // RNG
     std::mt19937 gen;
