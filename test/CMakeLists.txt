@@ -39,7 +39,7 @@ elseif(MSVC)
 		/external:W0 
 		/external:templates- 
 		/Wall 
-		/W4
+		/W3
 		/wd5045
 	)
 endif()

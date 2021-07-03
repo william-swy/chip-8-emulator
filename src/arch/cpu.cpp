@@ -31,13 +31,14 @@ void arch::CPU::fetch(Memory& mem) {
   pc_reg += 2;
 }
 
-void arch::CPU::decode_execute(Memory&) {
+void arch::CPU::decode_execute(Memory& mem, Graphics& graphics) {
   // Parse out first 4 bits
   switch (curr_opcode & 0xF000) {
     case 0x0000:
-      // TODO
       switch (curr_opcode) {
         case 0x00E0:
+          // Clears the screen
+          graphics.clear_screen();
           break;
         case 0x00EE:
           // Set program counter to top of stack. Decrease stack pointer by 1.
@@ -272,7 +273,31 @@ void arch::CPU::decode_execute(Memory&) {
       }
       break;
     case 0xD000:
-      // TODO
+      // Of form DXYN. Draws a sprite at location (register X value, register Y value) using the
+      // sprite data that is a total of N bytes which stored starting at address of the value in
+      // register I
+      {
+        const auto reg_X = static_cast<unsigned char>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_Y = static_cast<unsigned char>((curr_opcode & 0x00F0) >> 4);
+        const auto height = static_cast<unsigned char>(curr_opcode & 0x000F);
+        const auto x_coord = general_reg[reg_X];
+        const auto y_coord = general_reg[reg_Y];
+
+        auto collision_flag = false;
+
+        for (auto y = 0; y < height; y++) {
+          const auto row_byte = mem.get_value(static_cast<unsigned short>(index_reg + y));
+          for (auto x = 0; x < 8; x++) {
+            const auto val = static_cast<bool>(row_byte & (0x80 >> x));
+            const auto result = graphics.draw_pixel(
+                static_cast<size_t>((x_coord + x) % arch::graphics::screen_width),
+                static_cast<size_t>((y_coord + y) % arch::graphics::screen_height), val);
+            collision_flag = static_cast<bool>(collision_flag || result);
+          }
+        }
+
+        general_reg[0xF] = collision_flag;
+      }
       break;
     case 0xE000:
       // TODO

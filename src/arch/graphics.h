@@ -29,6 +29,8 @@ namespace arch {
 
     void clear_screen() noexcept;
 
+    bool draw_pixel(size_t x, size_t y, bool value);
+
   private:
     std::array<bool, graphics::total_pixels> display_pixels;
   };

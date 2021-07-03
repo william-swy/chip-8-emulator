@@ -7,6 +7,7 @@
 #  include <stdexcept>
 #  include <string>
 
+#  include "graphics.h"
 #  include "memory.h"
 
 namespace arch {
@@ -20,7 +21,7 @@ namespace arch {
 
     void fetch(Memory& mem);
 
-    void decode_execute(Memory& mem);
+    void decode_execute(Memory& mem, Graphics& graphics);
 
     // Getters and setters for general registers and stack to make sure that only valid indices are
     // provided. Although they are both std::array which has its own bounds checking, by doing the
@@ -53,7 +54,7 @@ namespace arch {
 
     unsigned char sp_reg;  // Stack pointer register 16 bit
     // Stack for storing return addresses
-    std::array<unsigned short, stack_size+1> stack;  // Meant to store return addresses
+    std::array<unsigned short, stack_size + 1> stack;  // Meant to store return addresses
 
     // RNG
     std::mt19937 gen;

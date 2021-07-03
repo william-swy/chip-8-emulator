@@ -36,7 +36,7 @@ elseif(MSVC)
 		/external:anglebrackets 
 		/external:W0 
 		/Wall 
-		/W4 
+		/W3 
 		/wd5045
 	)
 endif()

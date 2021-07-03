@@ -1,0 +1,4 @@
+Checks:          '*,-google-*,-modernize-*,clang-analyzer-*,cppcoreguidelines-*,readability-*'
+WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+FormatStyle:     none

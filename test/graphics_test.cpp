@@ -102,3 +102,27 @@ TEST(graphics_test, test_set_pixel_x_and_y_out_of_bounds) {
     SUCCEED();
   }
 }
+
+TEST(graphics_test, test_draw_pixel_true_true) {
+  arch::Graphics graphics{};
+  graphics.set_pixel(2, 5, true);
+  EXPECT_EQ(graphics.draw_pixel(2, 5, true), true);
+}
+
+TEST(graphics_test, test_draw_pixel_true_false) {
+  arch::Graphics graphics{};
+  graphics.set_pixel(2, 5, true);
+  EXPECT_EQ(graphics.draw_pixel(2, 5, false), false);
+}
+
+TEST(graphics_test, test_draw_pixel_false_true) {
+  arch::Graphics graphics{};
+  graphics.set_pixel(2, 5, false);
+  EXPECT_EQ(graphics.draw_pixel(2, 5, true), false);
+}
+
+TEST(graphics_test, test_draw_pixel_false_false) {
+  arch::Graphics graphics{};
+  graphics.set_pixel(2, 5, false);
+  EXPECT_EQ(graphics.draw_pixel(2, 5, false), false);
+}
