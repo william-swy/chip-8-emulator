@@ -1352,8 +1352,6 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
   expected[5] = 1;
   expected[6] = 1;
 
-
-
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1370,7 +1368,6 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
   graphics.set_pixel(3, 0, true);
   graphics.set_pixel(4, 0, true);
 
-
   cpu.decode_execute(mem, graphics);
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
@@ -1380,4 +1377,161 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
   }
 
   EXPECT_EQ(cpu.get_general_reg(0xF), 1);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX1E) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.index_reg = 0x100;
+
+  cpu.curr_opcode = 0xF11E;
+  cpu.set_general_reg(0x1, 0xAB);
+  cpu.decode_execute(mem, graphics);
+  EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB);
+
+  cpu.curr_opcode = 0xFA1E;
+  cpu.set_general_reg(0xA, 0x42);
+  cpu.decode_execute(mem, graphics);
+  EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB + 0x42);
+
+  cpu.curr_opcode = 0xF51E;
+  cpu.set_general_reg(0x5, 0x1);
+  cpu.decode_execute(mem, graphics);
+  EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB + 0x42 + 0x1);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX29) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xFF29;
+  cpu.set_general_reg(0xF, 0x10);
+  cpu.decode_execute(mem, graphics);
+  EXPECT_EQ(cpu.index_reg, 0);
+
+  cpu.curr_opcode = 0xFA29;
+  cpu.set_general_reg(0xA, 0x03);
+  cpu.decode_execute(mem, graphics);
+  EXPECT_EQ(cpu.index_reg, 15);
+
+  cpu.curr_opcode = 0xF329;
+  cpu.set_general_reg(0x3, 0x8);
+  cpu.decode_execute(mem, graphics);
+  EXPECT_EQ(cpu.index_reg, 40);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX33_ones) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xF133;
+  cpu.set_general_reg(0x1, 5);
+  cpu.index_reg = 0x300;
+
+  cpu.decode_execute(mem, graphics);
+
+  EXPECT_EQ(mem.get_value(cpu.index_reg), 0);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 0);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 5);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX33_tens) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xF633;
+  cpu.set_general_reg(0x6, 30);
+  cpu.index_reg = 0x300;
+
+  cpu.decode_execute(mem, graphics);
+
+  EXPECT_EQ(mem.get_value(cpu.index_reg), 0);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 3);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 0);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX33_hundreds) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xFA33;
+  cpu.set_general_reg(0xA, 200);
+  cpu.index_reg = 0x300;
+
+  cpu.decode_execute(mem, graphics);
+
+  EXPECT_EQ(mem.get_value(cpu.index_reg), 2);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 0);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 0);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX33_generic_num) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xF233;
+  cpu.set_general_reg(0x2, 125);
+  cpu.index_reg = 0x300;
+
+  cpu.decode_execute(mem, graphics);
+
+  EXPECT_EQ(mem.get_value(cpu.index_reg), 1);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 2);
+  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 5);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX55) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xF355;
+  cpu.set_general_reg(0x0, 125);
+  cpu.set_general_reg(0x1, 35);
+  cpu.set_general_reg(0x2, 70);
+  cpu.set_general_reg(0x3, 23);
+  cpu.index_reg = 0x300;
+
+  cpu.decode_execute(mem, graphics);
+
+  EXPECT_EQ(mem.get_value(0x300), 125);
+  EXPECT_EQ(mem.get_value(0x300 + 1), 35);
+  EXPECT_EQ(mem.get_value(0x300 + 2), 70);
+  EXPECT_EQ(mem.get_value(0x300 + 3), 23);
+
+  EXPECT_EQ(cpu.index_reg, 0x300 + 0x3 + 1);
+}
+
+TEST(cpu_opcode_test, execute_instruction_FX65) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+
+  cpu.curr_opcode = 0xF565;
+  cpu.index_reg = 0x300;
+
+  mem.set_value(cpu.index_reg, 0x34);
+  mem.set_value(cpu.index_reg + 1, 0xF3);
+  mem.set_value(cpu.index_reg + 2, 0x3C);
+  mem.set_value(cpu.index_reg + 3, 0x1A);
+  mem.set_value(cpu.index_reg + 4, 0xAF);
+  mem.set_value(cpu.index_reg + 5, 0x79);
+
+  cpu.decode_execute(mem, graphics);
+
+  EXPECT_EQ(cpu.get_general_reg(0x0), 0x34);
+  EXPECT_EQ(cpu.get_general_reg(0x1), 0xF3);
+  EXPECT_EQ(cpu.get_general_reg(0x2), 0x3C);
+  EXPECT_EQ(cpu.get_general_reg(0x3), 0x1A);
+  EXPECT_EQ(cpu.get_general_reg(0x4), 0xAF);
+  EXPECT_EQ(cpu.get_general_reg(0x5), 0x79);
+
+  EXPECT_EQ(cpu.index_reg, 0x300 + 0x5 + 1);
 }

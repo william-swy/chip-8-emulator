@@ -304,6 +304,77 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics) {
       break;
     case 0xF000:
       // TODO
+      switch (curr_opcode & 0x00FF) {
+        case 0x07:
+          break;
+        case 0x0A:
+          break;
+        case 0x15:
+          break;
+        case 0x18:
+          break;
+        case 0x1E:
+          // Of form FX1E. Adds the value in register X to register I
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+
+            index_reg += general_reg[reg_id];
+          }
+          break;
+        case 0x29:
+          // Of form FX29. Set the value of register I to the address of the sprite that represents
+          // the hexadecimal digit stored in register X.
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+
+            index_reg = (general_reg[reg_id] & 0x0F) * 5;
+          }
+          break;
+        case 0x33:
+          // Of form FX33. Set the value stored in register X in binary coded. The hundredth digit
+          // is placed at address stored in register I, the tenth digit is placed at 1 + address
+          // stored in register I and the ones digit is placed at 2 + address stored in register I.
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+
+            // Yay floor division
+            // truncates the last 2 digits
+            mem.set_value(index_reg, general_reg[reg_id] / 100);
+            // truncates the last digit and then truncates the first digit of result
+            mem.set_value(index_reg + 1, (general_reg[reg_id] / 10) % 10);
+            // truncates the first digit and then truncates the first digit of result
+            mem.set_value(index_reg + 2, (general_reg[reg_id] % 100) % 10);
+          }
+          break;
+        case 0x55:
+          // Of form FX55. Stores the values from register 0 to register X inclusive starting at the
+          // address in register I. Register I is then set to I + X + 1 after the operation.
+          {
+            const auto x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+
+            for (auto reg = 0; reg <= x; reg++) {
+              mem.set_value(index_reg + reg, general_reg[reg]);
+            }
+            index_reg = static_cast<unsigned short>(index_reg + x + 1);
+          }
+          break;
+        case 0x65:
+          // Of form FX65. Stores values in registers 0 to X inclusive with values in memory
+          // starting from the address in register I. Register I is then set to I + X + 1 after the
+          // operation.
+          {
+            const auto x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+
+            for (auto reg = 0; reg <= x; reg++) {
+              general_reg[reg] = mem.get_value(index_reg + reg);
+            }
+            index_reg = static_cast<unsigned short>(index_reg + x + 1);
+          }
+
+          break;
+        default:
+          throw InvalidInstruction();
+      }
       break;
     default:
       // This is actually technically impossible to reach
