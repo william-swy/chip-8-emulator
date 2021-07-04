@@ -7,7 +7,7 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-set(TEST_SOURCES "memory_test.cpp" "cpu_test.cpp" "opcode_test.cpp" "graphics_test.cpp")
+set(TEST_SOURCES "memory_test.cpp" "cpu_test.cpp" "opcode_test.cpp" "graphics_test.cpp" "keypad_test.cpp")
 
 add_executable(
 	chip8_emulator_tests

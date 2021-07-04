@@ -8,6 +8,7 @@
 #  include <string>
 
 #  include "graphics.h"
+#  include "keypad.h"
 #  include "memory.h"
 
 namespace arch {
@@ -21,7 +22,7 @@ namespace arch {
 
     void fetch(Memory& mem);
 
-    void decode_execute(Memory& mem, Graphics& graphics);
+    void decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad);
 
     // Getters and setters for general registers and stack to make sure that only valid indices are
     // provided. Although they are both std::array which has its own bounds checking, by doing the

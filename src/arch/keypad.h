@@ -3,14 +3,29 @@
 #  define CHIP8EMULATOR_ARCH_KEYPAD_H_
 
 #  include <array>
+#  include <stdexcept>
 
 namespace arch {
+  namespace keypad {
+    constexpr size_t num_of_keys = 16;  // Number of keys
+
+    class InvalidKey : public std::exception {
+    public:
+      virtual const char* what() const noexcept { return "Invalid key.\n"; }
+    };
+  }  // namespace keypad
   class Keypad {
   public:
-    std::array<unsigned char, num_of_keys> keys_state;  // Stete of each key
+    Keypad();
+
+    void press_key(unsigned char key_num);
+
+    void release_key(unsigned char key_num);
+
+    [[nodiscard]] bool is_pressed(unsigned char key_num) const;
 
   private:
-    constexpr usize num_of_keys = 16;  // Number of keys
+    std::array<bool, keypad::num_of_keys> keys_state;  // Stete of each key
   };
 }  // namespace arch
 #endif  // !CHIP8EMULATOR_ARCH_KEYPAD_H_

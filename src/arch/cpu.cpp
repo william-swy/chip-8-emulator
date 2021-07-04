@@ -7,10 +7,10 @@ arch::CPU::CPU() {
   pc_reg = pc_start_value;
   sp_reg = 0;
 
-  general_reg = {};
+  general_reg.fill(0);
   delay_timer_reg = 0;
   sound_timer_reg = 0;
-  stack = {};
+  stack.fill(0);
   curr_opcode = 0;
 
   const std::string seed_str("RNG seed string");
@@ -31,7 +31,7 @@ void arch::CPU::fetch(Memory& mem) {
   pc_reg += 2;
 }
 
-void arch::CPU::decode_execute(Memory& mem, Graphics& graphics) {
+void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) {
   // Parse out first 4 bits
   switch (curr_opcode & 0xF000) {
     case 0x0000:
@@ -300,18 +300,61 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics) {
       }
       break;
     case 0xE000:
-      // TODO
+      switch (curr_opcode & 0x00FF) {
+        case 0x9E:
+          // Of form EX9E. Skips the next instruction if the key number in register X is pressed.
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            try {
+              if (keypad.is_pressed(general_reg[reg_id])) {
+                pc_reg += 2;
+              }
+            } catch (const arch::keypad::InvalidKey&) {
+            }
+          }
+          break;
+        case 0xA1:
+          // Of form EXA1. Skips the next instruction if the key number in register X is not
+          // pressed.
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            try {
+              if (!keypad.is_pressed(general_reg[reg_id])) {
+                pc_reg += 2;
+              }
+            } catch (const arch::keypad::InvalidKey&) {
+            }
+          }
+          break;
+        default:
+          throw InvalidInstruction();
+      }
       break;
     case 0xF000:
-      // TODO
       switch (curr_opcode & 0x00FF) {
         case 0x07:
+          // Of form FX07. Store the current value of the delay timer in register X
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            general_reg[reg_id] = delay_timer_reg;
+          }
           break;
         case 0x0A:
+          // TODO
           break;
         case 0x15:
+          // Of form FX15. Set the delay timer to the value in register X
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            delay_timer_reg = general_reg[reg_id];
+          }
           break;
         case 0x18:
+          // Of form FX1E. Set the sound timer to the value in register X
+          {
+            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            sound_timer_reg = general_reg[reg_id];
+          }
           break;
         case 0x1E:
           // Of form FX1E. Adds the value in register X to register I

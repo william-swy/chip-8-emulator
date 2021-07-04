@@ -5,17 +5,19 @@
 
 #include "arch/cpu.h"
 #include "arch/graphics.h"
+#include "arch/keypad.h"
 #include "arch/memory.h"
 
 TEST(cpu_opcode_test, execute_instruction_ANNN_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xA123;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.index_reg, 0x0123);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown\n";
@@ -26,6 +28,7 @@ TEST(cpu_opcode_test, execute_instruction_ANNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   struct OpcodeExpected {
     unsigned short opcode;
@@ -47,7 +50,7 @@ TEST(cpu_opcode_test, execute_instruction_ANNN_many_times) {
   for (const auto& val : opcodes) {
     cpu.curr_opcode = val.opcode;
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.index_reg, val.expected);
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown\n";
@@ -59,12 +62,13 @@ TEST(cpu_opcode_test, execute_instruction_BNNN_once) {
   arch::CPU cpu;
   arch::Memory mem;
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.set_general_reg(0, 0xF1);
   cpu.curr_opcode = 0xB234;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x0234 + 0xF1);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown\n";
@@ -92,13 +96,14 @@ TEST(cpu_opcode_test, execute_instruction_BNNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto val : input) {
     cpu.set_general_reg(0, val.reg_v0);
     cpu.curr_opcode = val.opcode;
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.pc_reg, val.expected_address
 
       );
@@ -112,11 +117,12 @@ TEST(cpu_opcode_test, execute_instruction_1NNN_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xB123;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x0123);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown\n";
@@ -143,11 +149,12 @@ TEST(cpu_opcode_test, execute_instruction_1NNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input) {
     try {
       cpu.curr_opcode = val.opcode;
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.pc_reg, val.expected_address);
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown\n";
@@ -159,13 +166,14 @@ TEST(cpu_opcode_test, execute_instruction_3XNN_once_no_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.pc_reg = 0x3460;
   cpu.set_general_reg(0x0, 0x11);
   cpu.curr_opcode = 0x3012;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x3460);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -176,13 +184,14 @@ TEST(cpu_opcode_test, execute_instruction_3XNN_once_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.pc_reg = 0x3460;
   cpu.set_general_reg(0x4, 0x25);
   cpu.curr_opcode = 0x3425;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x3460 + 2);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -212,13 +221,14 @@ TEST(cpu_opcode_test, execute_instruction_3XNN_many_assorted_skips) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input_vals) {
     cpu.pc_reg = val.start_pc;
     cpu.curr_opcode = val.opcode;
     cpu.set_general_reg(val.register_id, val.register_value);
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
         EXPECT_EQ(cpu.pc_reg, val.start_pc + 2);
       } else {
@@ -234,13 +244,14 @@ TEST(cpu_opcode_test, execute_instruction_4XNN_once_no_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.pc_reg = 0x3460;
   cpu.set_general_reg(0x0, 0x12);
   cpu.curr_opcode = 0x4012;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x3460);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -251,13 +262,14 @@ TEST(cpu_opcode_test, execute_instruction_4XNN_once_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.pc_reg = 0x3460;
   cpu.set_general_reg(0x4, 0xAF);
   cpu.curr_opcode = 0x4425;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x3460 + 2);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -287,13 +299,14 @@ TEST(cpu_opcode_test, execute_instruction_4XNN_many_assorted_skips) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input_vals) {
     cpu.pc_reg = val.start_pc;
     cpu.curr_opcode = val.opcode;
     cpu.set_general_reg(val.register_id, val.register_value);
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
         EXPECT_EQ(cpu.pc_reg, val.start_pc + 2);
       } else {
@@ -309,11 +322,12 @@ TEST(cpu_opcode_test, invalid_5000_instruction) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x53F1;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     FAIL() << "InvalidInstruction exception should have been thrown.\n";
   } catch (const arch::InvalidInstruction&) {
     SUCCEED();
@@ -324,6 +338,7 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_once_no_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x57F0;
   cpu.set_general_reg(0x7, 0x3);
@@ -331,7 +346,7 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_once_no_skip) {
   cpu.pc_reg = 0x300;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x300);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -342,6 +357,7 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_once_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x54B0;
   cpu.set_general_reg(0x4, 0xF);
@@ -349,7 +365,7 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_once_skip) {
   cpu.pc_reg = 0x512;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x512 + 0x2);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -381,6 +397,7 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_many_assorted_skips) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : inputs) {
     cpu.curr_opcode = val.opcode;
@@ -388,7 +405,7 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_many_assorted_skips) {
     cpu.set_general_reg(val.reg_X, val.reg_X_val);
     cpu.set_general_reg(val.reg_Y, val.reg_Y_val);
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
         EXPECT_EQ(cpu.pc_reg, val.curr_pc + 2);
       } else {
@@ -405,11 +422,12 @@ TEST(cpu_opcode_test, execute_instruction_6XNN_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x6123;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x1), 0x23);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -439,12 +457,13 @@ TEST(cpu_opcode_test, execute_instruction_6XNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : inputs) {
     cpu.curr_opcode = val.opcode;
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_id), val.value);
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -456,12 +475,13 @@ TEST(cpu_opcode_test, execute_instruction_7XNN_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x70F1;
   cpu.set_general_reg(0x0, 0x10);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x0), static_cast<unsigned char>(0x10 + 0xF1));
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -492,13 +512,14 @@ TEST(cpu_opcode_test, execute_instruction_7XNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : inputs) {
     cpu.curr_opcode = val.opcode;
 
     try {
       cpu.set_general_reg(val.reg_id, val.initial_val);
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_id),
                 static_cast<unsigned char>(val.initial_val + val.add_value));
     } catch (const arch::InvalidInstruction&) {
@@ -511,11 +532,12 @@ TEST(cpu_opcode_test, invalid_9000_instruction) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x93F1;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     FAIL() << "InvalidInstruction exception should have been thrown.\n";
   } catch (const arch::InvalidInstruction&) {
     SUCCEED();
@@ -526,6 +548,7 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_once_no_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x97F0;
   cpu.set_general_reg(0x7, 0x3);
@@ -533,7 +556,7 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_once_no_skip) {
   cpu.pc_reg = 0x300;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x300);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -544,6 +567,7 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_once_skip) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x94B0;
   cpu.set_general_reg(0x4, 0xF);
@@ -551,7 +575,7 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_once_skip) {
   cpu.pc_reg = 0x512;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x512 + 0x2);
   } catch (const arch::InvalidInstruction&) {
     FAIL() << "InvalidInstruction exception should not have been thrown.\n";
@@ -583,6 +607,7 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_many_assorted_skips) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : inputs) {
     cpu.curr_opcode = val.opcode;
@@ -590,7 +615,7 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_many_assorted_skips) {
     cpu.set_general_reg(val.reg_X, val.reg_X_val);
     cpu.set_general_reg(val.reg_Y, val.reg_Y_val);
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
         EXPECT_EQ(cpu.pc_reg, val.curr_pc + 2);
       } else {
@@ -613,11 +638,12 @@ TEST(cpu_opcode_test, execute_instruction_CXNN_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xC1FF;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(1), static_cast<unsigned char>(rng(gen) & 0xFF));
 
   } catch (const arch::InvalidInstruction&) {
@@ -635,6 +661,7 @@ TEST(cpu_opcode_test, execute_instruction_CXNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   struct TestInputs {
     unsigned short opcode;
@@ -652,7 +679,7 @@ TEST(cpu_opcode_test, execute_instruction_CXNN_many_times) {
     cpu.curr_opcode = val.opcode;
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_id), static_cast<unsigned char>(rng(gen) & val.mask));
 
     } catch (const arch::InvalidInstruction&) {
@@ -665,12 +692,13 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x24F2;
   cpu.pc_reg = 0x200;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x04F2);
     EXPECT_EQ(cpu.get_stack_pointer(), 1);
     EXPECT_EQ(cpu.get_stack(), 0x200);
@@ -686,6 +714,7 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   constexpr auto start_pc = 0x200;
   constexpr auto call_foo1_opcode = 0x2400;
@@ -702,7 +731,7 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
   cpu.curr_opcode = call_foo1_opcode;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, foo1_address);
     EXPECT_EQ(cpu.get_stack_pointer(), 1);
     EXPECT_EQ(cpu.get_stack(), start_pc);
@@ -713,7 +742,7 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
   cpu.curr_opcode = call_bar_opcode;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, bar_address);
     EXPECT_EQ(cpu.get_stack_pointer(), 2);
     cpu.set_stack_pointer(1);
@@ -727,7 +756,7 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
   cpu.curr_opcode = call_foo2_opcode;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, foo2_address);
     EXPECT_EQ(cpu.get_stack_pointer(), 3);
     cpu.set_stack_pointer(1);
@@ -745,6 +774,7 @@ TEST(cpu_opcode_test, execute_instruction_00EE_once) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x00EE;
 
@@ -752,7 +782,7 @@ TEST(cpu_opcode_test, execute_instruction_00EE_once) {
   cpu.set_stack(0x1234);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, 0x1234);
     EXPECT_EQ(cpu.get_stack_pointer(), 0);
   } catch (const arch::InvalidInstruction&) {
@@ -773,6 +803,7 @@ TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.set_stack_pointer(1);
   cpu.set_stack(main_return_address);
@@ -784,7 +815,7 @@ TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
   cpu.curr_opcode = opcode;
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, bar_return_adress);
     EXPECT_EQ(cpu.get_stack_pointer(), 2);
     EXPECT_EQ(cpu.get_stack(), foo1_return_adress);
@@ -793,7 +824,7 @@ TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
   }
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, foo1_return_adress);
     EXPECT_EQ(cpu.get_stack_pointer(), 1);
     EXPECT_EQ(cpu.get_stack(), main_return_address);
@@ -802,7 +833,7 @@ TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
   }
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.pc_reg, main_return_address);
     EXPECT_EQ(cpu.get_stack_pointer(), 0);
   } catch (const arch::InvalidInstruction&) {
@@ -828,6 +859,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY0_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input) {
     cpu.curr_opcode = val.opcode;
@@ -835,7 +867,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY0_many_times) {
     cpu.set_general_reg(val.reg_y, val.reg_y_val);
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_x), val.reg_y_val);
     } catch (const arch::InvalidInstruction&) {
       FAIL() << "InvalidInstruction exception should not have been thrown\n";
@@ -861,6 +893,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY1_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input) {
     cpu.curr_opcode = val.opcode;
@@ -868,7 +901,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY1_many_times) {
     cpu.set_general_reg(val.reg_y, val.reg_y_val);
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_x),
                 static_cast<unsigned char>(val.reg_y_val | val.reg_x_val));
     } catch (const arch::InvalidInstruction&) {
@@ -895,6 +928,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY2_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input) {
     cpu.curr_opcode = val.opcode;
@@ -902,7 +936,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY2_many_times) {
     cpu.set_general_reg(val.reg_y, val.reg_y_val);
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_x),
                 static_cast<unsigned char>(val.reg_y_val & val.reg_x_val));
     } catch (const arch::InvalidInstruction&) {
@@ -929,6 +963,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY3_many_times) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   for (const auto& val : input) {
     cpu.curr_opcode = val.opcode;
@@ -936,7 +971,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY3_many_times) {
     cpu.set_general_reg(val.reg_y, val.reg_y_val);
 
     try {
-      cpu.decode_execute(mem, graphics);
+      cpu.decode_execute(mem, graphics, keypad);
       EXPECT_EQ(cpu.get_general_reg(val.reg_x),
                 static_cast<unsigned char>(val.reg_y_val ^ val.reg_x_val));
     } catch (const arch::InvalidInstruction&) {
@@ -949,6 +984,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY4_no_overflow) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x8A14;
 
@@ -956,7 +992,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY4_no_overflow) {
   cpu.set_general_reg(0x1, 0x12);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 + 0x12));
     EXPECT_EQ(cpu.get_general_reg(0x1), 0x12);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
@@ -969,6 +1005,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY4_overflow) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x83C4;
 
@@ -976,7 +1013,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY4_overflow) {
   cpu.set_general_reg(0xC, 0x11);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xFF + 0x11));
     EXPECT_EQ(cpu.get_general_reg(0xC), 0x11);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
@@ -989,6 +1026,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_no_overflow) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x8A15;
 
@@ -996,7 +1034,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_no_overflow) {
   cpu.set_general_reg(0x1, 0x12);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 - 0x12));
     EXPECT_EQ(cpu.get_general_reg(0x1), 0x12);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
@@ -1009,6 +1047,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_overflow) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x83C5;
 
@@ -1016,7 +1055,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_overflow) {
   cpu.set_general_reg(0xC, 0xAB);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xA1 - 0xAB));
     EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
@@ -1029,13 +1068,14 @@ TEST(cpu_opcode_test, execute_instruction_8XY6_rightmost_zero) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x8A16;
 
   cpu.set_general_reg(0x1, 0x14);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0xA), 0xA);
     EXPECT_EQ(cpu.get_general_reg(0x1), 0x14);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
@@ -1048,13 +1088,14 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_rightmost_one) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x83C6;
 
   cpu.set_general_reg(0xC, 0xAB);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x3), 0x55);
     EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
@@ -1067,6 +1108,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY7_no_overflow) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x8A17;
 
@@ -1074,7 +1116,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY7_no_overflow) {
   cpu.set_general_reg(0x1, 0x34);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 - 0x12));
     EXPECT_EQ(cpu.get_general_reg(0x1), 0x34);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
@@ -1087,6 +1129,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY7_overflow) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x83C7;
 
@@ -1094,7 +1137,7 @@ TEST(cpu_opcode_test, execute_instruction_8XY7_overflow) {
   cpu.set_general_reg(0xC, 0xA1);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xA1 - 0xAB));
     EXPECT_EQ(cpu.get_general_reg(0xC), 0xA1);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
@@ -1107,13 +1150,14 @@ TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_zero) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x8A1E;
 
   cpu.set_general_reg(0x1, 0x14);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0xA), 0x28);
     EXPECT_EQ(cpu.get_general_reg(0x1), 0x14);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
@@ -1126,13 +1170,14 @@ TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_one) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x83CE;
 
   cpu.set_general_reg(0xC, 0xAB);
 
   try {
-    cpu.decode_execute(mem, graphics);
+    cpu.decode_execute(mem, graphics, keypad);
     EXPECT_EQ(cpu.get_general_reg(0x3), 0x56);
     EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
     EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
@@ -1145,6 +1190,7 @@ TEST(cpu_opcode_test, execute_instruction_00E0) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0x00E0;
 
@@ -1159,7 +1205,7 @@ TEST(cpu_opcode_test, execute_instruction_00E0) {
     graphics.set_pixel(x_pos(gen), y_pos(gen), pixel_val(gen));
   }
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   for (auto i = 0; i < arch::graphics::screen_width; i++) {
     for (auto j = 0; j < arch::graphics::screen_height; j++) {
@@ -1204,6 +1250,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_no_collision) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xD015;
   cpu.set_general_reg(0x0, 0);
@@ -1216,7 +1263,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_no_collision) {
   mem.set_value(cpu.index_reg + 3, 0x90);
   mem.set_value(cpu.index_reg + 4, 0xF0);
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
@@ -1267,6 +1314,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_width_wrap_around_no_collision) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xD345;
   cpu.set_general_reg(0x3, arch::graphics::screen_width - 1);
@@ -1279,7 +1327,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_width_wrap_around_no_collision) {
   mem.set_value(cpu.index_reg + 3, 0x80);
   mem.set_value(cpu.index_reg + 4, 0xF0);
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
@@ -1321,6 +1369,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_height_wrap_around_no_collision) 
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xDAB5;
   cpu.set_general_reg(0xA, 1);
@@ -1333,7 +1382,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_height_wrap_around_no_collision) 
   mem.set_value(cpu.index_reg + 3, 0x40);
   mem.set_value(cpu.index_reg + 4, 0x40);
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
@@ -1355,6 +1404,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xD561;
   cpu.set_general_reg(0x5, 3);
@@ -1368,7 +1418,7 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
   graphics.set_pixel(3, 0, true);
   graphics.set_pixel(4, 0, true);
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
@@ -1383,22 +1433,23 @@ TEST(cpu_opcode_test, execute_instruction_FX1E) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.index_reg = 0x100;
 
   cpu.curr_opcode = 0xF11E;
   cpu.set_general_reg(0x1, 0xAB);
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
   EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB);
 
   cpu.curr_opcode = 0xFA1E;
   cpu.set_general_reg(0xA, 0x42);
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
   EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB + 0x42);
 
   cpu.curr_opcode = 0xF51E;
   cpu.set_general_reg(0x5, 0x1);
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
   EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB + 0x42 + 0x1);
 }
 
@@ -1406,20 +1457,21 @@ TEST(cpu_opcode_test, execute_instruction_FX29) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xFF29;
   cpu.set_general_reg(0xF, 0x10);
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
   EXPECT_EQ(cpu.index_reg, 0);
 
   cpu.curr_opcode = 0xFA29;
   cpu.set_general_reg(0xA, 0x03);
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
   EXPECT_EQ(cpu.index_reg, 15);
 
   cpu.curr_opcode = 0xF329;
   cpu.set_general_reg(0x3, 0x8);
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
   EXPECT_EQ(cpu.index_reg, 40);
 }
 
@@ -1427,12 +1479,13 @@ TEST(cpu_opcode_test, execute_instruction_FX33_ones) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xF133;
   cpu.set_general_reg(0x1, 5);
   cpu.index_reg = 0x300;
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   EXPECT_EQ(mem.get_value(cpu.index_reg), 0);
   EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 0);
@@ -1443,12 +1496,13 @@ TEST(cpu_opcode_test, execute_instruction_FX33_tens) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xF633;
   cpu.set_general_reg(0x6, 30);
   cpu.index_reg = 0x300;
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   EXPECT_EQ(mem.get_value(cpu.index_reg), 0);
   EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 3);
@@ -1459,12 +1513,13 @@ TEST(cpu_opcode_test, execute_instruction_FX33_hundreds) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xFA33;
   cpu.set_general_reg(0xA, 200);
   cpu.index_reg = 0x300;
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   EXPECT_EQ(mem.get_value(cpu.index_reg), 2);
   EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 0);
@@ -1475,12 +1530,13 @@ TEST(cpu_opcode_test, execute_instruction_FX33_generic_num) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xF233;
   cpu.set_general_reg(0x2, 125);
   cpu.index_reg = 0x300;
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   EXPECT_EQ(mem.get_value(cpu.index_reg), 1);
   EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 2);
@@ -1491,6 +1547,7 @@ TEST(cpu_opcode_test, execute_instruction_FX55) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xF355;
   cpu.set_general_reg(0x0, 125);
@@ -1499,7 +1556,7 @@ TEST(cpu_opcode_test, execute_instruction_FX55) {
   cpu.set_general_reg(0x3, 23);
   cpu.index_reg = 0x300;
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   EXPECT_EQ(mem.get_value(0x300), 125);
   EXPECT_EQ(mem.get_value(0x300 + 1), 35);
@@ -1513,6 +1570,7 @@ TEST(cpu_opcode_test, execute_instruction_FX65) {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
+  arch::Keypad keypad{};
 
   cpu.curr_opcode = 0xF565;
   cpu.index_reg = 0x300;
@@ -1524,7 +1582,7 @@ TEST(cpu_opcode_test, execute_instruction_FX65) {
   mem.set_value(cpu.index_reg + 4, 0xAF);
   mem.set_value(cpu.index_reg + 5, 0x79);
 
-  cpu.decode_execute(mem, graphics);
+  cpu.decode_execute(mem, graphics, keypad);
 
   EXPECT_EQ(cpu.get_general_reg(0x0), 0x34);
   EXPECT_EQ(cpu.get_general_reg(0x1), 0xF3);
@@ -1534,4 +1592,72 @@ TEST(cpu_opcode_test, execute_instruction_FX65) {
   EXPECT_EQ(cpu.get_general_reg(0x5), 0x79);
 
   EXPECT_EQ(cpu.index_reg, 0x300 + 0x5 + 1);
+}
+
+TEST(cpu_opcode_test, execute_instruction_EX9E_skip) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+  arch::Keypad keypad{};
+
+  cpu.curr_opcode = 0xE19E;
+  cpu.set_general_reg(0x1, 2);
+  cpu.pc_reg = 0x200;
+
+  keypad.press_key(2);
+
+  cpu.decode_execute(mem, graphics, keypad);
+
+  EXPECT_EQ(cpu.pc_reg, 0x200 + 2);
+}
+
+TEST(cpu_opcode_test, execute_instruction_EX9E_no_skip) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+  arch::Keypad keypad{};
+
+  cpu.curr_opcode = 0xE49E;
+  cpu.set_general_reg(0x4, 5);
+  cpu.pc_reg = 0x200;
+
+  keypad.release_key(5);
+
+  cpu.decode_execute(mem, graphics, keypad);
+
+  EXPECT_EQ(cpu.pc_reg, 0x200);
+}
+
+TEST(cpu_opcode_test, execute_instruction_EXA1_skip) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+  arch::Keypad keypad{};
+
+  cpu.curr_opcode = 0xE1A1;
+  cpu.set_general_reg(0x1, 7);
+  cpu.pc_reg = 0x200;
+
+  keypad.release_key(7);
+
+  cpu.decode_execute(mem, graphics, keypad);
+
+  EXPECT_EQ(cpu.pc_reg, 0x200 + 2);
+}
+
+TEST(cpu_opcode_test, execute_instruction_EXA1_no_skip) {
+  arch::CPU cpu{};
+  arch::Memory mem{};
+  arch::Graphics graphics{};
+  arch::Keypad keypad{};
+
+  cpu.curr_opcode = 0xE0A1;
+  cpu.set_general_reg(0x0, 9);
+  cpu.pc_reg = 0x200;
+
+  keypad.press_key(9);
+
+  cpu.decode_execute(mem, graphics, keypad);
+
+  EXPECT_EQ(cpu.pc_reg, 0x200);
 }
