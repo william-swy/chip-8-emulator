@@ -13,6 +13,8 @@ arch::CPU::CPU() {
   stack.fill(0);
   curr_opcode = 0;
 
+  updated_screen = false;
+
   const std::string seed_str("RNG seed string");
   const std::seed_seq seed(seed_str.begin(), seed_str.end());
   gen = std::mt19937(seed);
@@ -33,12 +35,14 @@ void arch::CPU::fetch(Memory& mem) {
 
 void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) {
   // Parse out first 4 bits
+  updated_screen = false;
   switch (curr_opcode & 0xF000) {
     case 0x0000:
       switch (curr_opcode) {
         case 0x00E0:
           // Clears the screen
           graphics.clear_screen();
+          updated_screen = true;
           break;
         case 0x00EE:
           // Set program counter to top of stack. Decrease stack pointer by 1.
@@ -297,6 +301,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         }
 
         general_reg[0xF] = collision_flag;
+
+        updated_screen = true;
       }
       break;
     case 0xE000:

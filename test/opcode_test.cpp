@@ -3,10 +3,10 @@
 #include <array>
 #include <random>
 
-#include "arch/cpu.h"
-#include "arch/graphics.h"
-#include "arch/keypad.h"
-#include "arch/memory.h"
+#include "cpu.h"
+#include "graphics.h"
+#include "keypad.h"
+#include "memory.h"
 
 TEST(cpu_opcode_test, execute_instruction_ANNN_once) {
   arch::CPU cpu{};

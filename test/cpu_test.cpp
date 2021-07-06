@@ -1,11 +1,11 @@
-#include "arch/cpu.h"
+#include "cpu.h"
 
 #include <gtest/gtest.h>
 
 #include <array>
 #include <random>
 
-#include "arch/memory.h"
+#include "memory.h"
 
 TEST(cpu_test, get_first_general_reg) {
   const arch::CPU cpu;

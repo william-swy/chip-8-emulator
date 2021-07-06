@@ -1,4 +1,4 @@
-#include "arch/keypad.h"
+#include "keypad.h"
 
 #include <gtest/gtest.h>
 

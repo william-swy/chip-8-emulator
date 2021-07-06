@@ -1,4 +1,4 @@
-#include "arch/memory.h"
+#include "memory.h"
 
 #include <gtest/gtest.h>
 

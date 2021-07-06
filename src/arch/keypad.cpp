@@ -1,4 +1,4 @@
-#include "arch/keypad.h"
+#include "keypad.h"
 
 arch::Keypad::Keypad() { keys_state.fill(false); }
 

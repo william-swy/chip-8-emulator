@@ -2,26 +2,61 @@
 #ifndef CHIP8EMULATOR_CHIP8_H_
 #  define CHIP8EMULATOR_CHIP8_H_
 
+#  include <array>
+#  include <string>
+
 #  include "arch/cpu.h"
 #  include "arch/graphics.h"
 #  include "arch/keypad.h"
 #  include "arch/memory.h"
 
+constexpr std::array<unsigned char, 80> chip8_fontset = {
+    0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
+    0x20, 0x60, 0x20, 0x20, 0x70,  // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0,  // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0,  // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10,  // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0,  // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0,  // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40,  // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0,  // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0,  // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90,  // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0,  // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0,  // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0,  // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0,  // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80   // F
+};
+
 class Chip8 {
 public:
-  Chip8() = default;
+  Chip8(std::string& file_name);
 
   void emulate_cycle();
 
-  bool should_draw();
+  bool should_draw() const;
+
+  bool get_pixel(unsigned int x, unsigned int y) const;
 
   void set_keys();
 
+  bool has_next_pixel();
+
 private:
-  CPU cpu;
-  Memory memory;
-  Keypad keypad;
-  Graphics graphics
+  arch::CPU cpu;
+  arch::Memory memory;
+  arch::Keypad keypad;
+  arch::Graphics graphics;
+
+  unsigned int curr_x;
+  unsigned int curr_y;
+};
+
+struct RenderInstruction {
+  unsigned int unscaled_x_pos;
+  unsigned int unscaled_y_pos;
+  bool pixel_white;
 };
 
 #endif  // !CHIP8EMULATOR_CHIP8_H_

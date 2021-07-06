@@ -49,6 +49,8 @@ namespace arch {
     unsigned char delay_timer_reg;  // Delay timer register 8 bits
     unsigned char sound_timer_reg;  // Sound timer register 8 bits
 
+    bool updated_screen;
+
   private:
     // Registers
     std::array<unsigned char, num_general_reg> general_reg;  // General purpose registers 16 8 bit

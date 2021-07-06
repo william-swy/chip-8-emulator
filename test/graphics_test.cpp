@@ -1,4 +1,4 @@
-#include "arch/graphics.h"
+#include "graphics.h"
 
 #include <gtest/gtest.h>
 
