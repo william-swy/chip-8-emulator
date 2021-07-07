@@ -7,7 +7,7 @@ add_subdirectory("arch")
 
 add_subdirectory("display")
 
-add_executable(chip8_emulator "main.cpp" "chip8.cpp" "chip8.h")
+add_executable(chip8_emulator "main.cpp" "chip8.cpp" "chip8.h" "display/keys.h")
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_options(chip8_emulator PUBLIC -Wall -Wpedantic -Wextra -Werror)

@@ -4,6 +4,8 @@
 
 #  include <memory>
 
+#  include "keys.h"
+
 namespace display {
   class Display {
   public:
@@ -27,7 +29,9 @@ namespace display {
 
     void delay(unsigned int milli_sec) const;
 
-    bool stop_rendering();
+    bool stop_rendering() const;
+
+    KeyPressed handle_keyboard() const;
 
   private:
     class sdl_pimpl;

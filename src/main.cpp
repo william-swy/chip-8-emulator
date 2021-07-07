@@ -3,11 +3,13 @@
 
 #include "chip8.h"
 #include "display/display.h"
+#include "display/keys.h"
 
 constexpr unsigned int SCALING_FACTOR = 20;
 constexpr unsigned int WINDOW_WIDTH = arch::graphics::screen_width * SCALING_FACTOR;
 constexpr unsigned int WINDOW_HEIGHT = arch::graphics::screen_height * SCALING_FACTOR;
 
+KeyPressed keys;
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -41,5 +43,9 @@ int main(int argc, char** argv) {
       }
       display.render_display();
     }
+
+    keys = display.handle_keyboard();
+
+    emulator.set_keys(keys);
   }
 }

@@ -2,7 +2,7 @@
 # Library to handle screen rendering
 # ==================================================================================================
 
-set(DISPLAY_HEADERS "display.h")
+set(DISPLAY_HEADERS "display.h" "keys.h")
 set(DISPLAY_SOURCES "display.cpp")
 
 find_package(SDL2 REQUIRED)

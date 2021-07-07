@@ -1,12 +1,12 @@
 #include "display.h"
 #define SDL_MAIN_HANDLED
-#include "display.h"
-
 #include <SDL2/SDL.h>
 
+#include <array>
 #include <memory>
 
 #include "display.h"
+#include "keys.h"
 
 class display::Display::sdl_pimpl {
 public:
@@ -40,6 +40,27 @@ public:
 
   bool stop_rendering() { return SDL_PollEvent(&event) && event.type == SDL_QUIT; }
 
+  KeyPressed handle_keyboard() {
+    SDL_PollEvent(&event);
+    switch (event.type) {
+      case SDL_KEYDOWN:
+        keys[event.key.keysym.sym] = true;
+        break;
+      case SDL_KEYUP:
+        keys[event.key.keysym.sym] = false;
+        break;
+      default:
+        break;
+    }
+
+    // some hard coded mappings using the layout shown here
+    // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy2
+    return KeyPressed{keys[SDLK_x], keys[SDLK_1], keys[SDLK_2], keys[SDLK_3],
+                      keys[SDLK_q], keys[SDLK_w], keys[SDLK_e], keys[SDLK_a],
+                      keys[SDLK_s], keys[SDLK_d], keys[SDLK_z], keys[SDLK_c],
+                      keys[SDLK_4], keys[SDLK_r], keys[SDLK_f], keys[SDLK_v]};
+  }
+
 private:
   struct sdl_deleter {
     void operator()(SDL_Window* ptr) const { SDL_DestroyWindow(ptr); };
@@ -47,6 +68,8 @@ private:
   };
 
   SDL_Event event;
+
+  std::array<bool, 322> keys;
 
   std::unique_ptr<SDL_Window, sdl_deleter> window;
 
@@ -79,4 +102,6 @@ void display::Display::render_display() const { p_impl->render_display(); }
 
 void display::Display::delay(unsigned int milli_sec) const { p_impl->delay(milli_sec); }
 
-bool display::Display::stop_rendering() { return p_impl->stop_rendering(); }
+bool display::Display::stop_rendering() const { return p_impl->stop_rendering(); }
+
+KeyPressed display::Display::handle_keyboard() const { return p_impl->handle_keyboard(); }

@@ -10,6 +10,8 @@
 #  include "arch/keypad.h"
 #  include "arch/memory.h"
 
+#include "display/keys.h"
+
 constexpr std::array<unsigned char, 80> chip8_fontset = {
     0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
     0x20, 0x60, 0x20, 0x20, 0x70,  // 1
@@ -39,24 +41,13 @@ public:
 
   bool get_pixel(unsigned int x, unsigned int y) const;
 
-  void set_keys();
-
-  bool has_next_pixel();
+  void set_keys(KeyPressed& key_state);
 
 private:
   arch::CPU cpu;
   arch::Memory memory;
   arch::Keypad keypad;
   arch::Graphics graphics;
-
-  unsigned int curr_x;
-  unsigned int curr_y;
-};
-
-struct RenderInstruction {
-  unsigned int unscaled_x_pos;
-  unsigned int unscaled_y_pos;
-  bool pixel_white;
 };
 
 #endif  // !CHIP8EMULATOR_CHIP8_H_
