@@ -2,6 +2,11 @@
 
 A C++ emulator for Chip8
 
+## Samples
+![IBM-logo](samples/IBM_logo.gif)
+
+![pong](samples/pong.gif)
+
 ## Build instructions
 It is recommended to use vcpkg as the package manager as it will easily resolve dependencies. Also an in source build is prohibited as it pollutes the source directory
 
@@ -27,3 +32,4 @@ The binary `chip8_emulator_tests` is the test suite for the emulation logic and 
 - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy2 gives a streight forward explaination of the Chip8 architecture
 - https://github.com/bradford-hamilton/chippy/blob/master/roms/ibm_logo.ch8 for the IBM logo rom
 - https://github.com/bradford-hamilton/chippy/blob/master/roms/chip8_logo.ch8 for the chip8_logo rom
+- https://github.com/bradford-hamilton/chippy/blob/master/roms/pong.ch8 for the pong game rom
