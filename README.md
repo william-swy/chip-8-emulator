@@ -4,8 +4,10 @@ A C++ emulator for Chip8
 
 ## Samples
 ![IBM-logo](samples/IBM_logo.gif)
+Figure 1. IBM logo
 
 ![pong](samples/Pong.gif)
+Figure 2. The game pong
 
 ## Build instructions
 It is recommended to use vcpkg as the package manager as it will easily resolve dependencies. Also an in source build is prohibited as it pollutes the source directory
