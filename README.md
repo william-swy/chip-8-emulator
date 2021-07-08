@@ -5,7 +5,7 @@ A C++ emulator for Chip8
 ## Samples
 ![IBM-logo](samples/IBM_logo.gif)
 
-![pong](samples/pong.gif)
+![pong](samples/Pong.gif)
 
 ## Build instructions
 It is recommended to use vcpkg as the package manager as it will easily resolve dependencies. Also an in source build is prohibited as it pollutes the source directory
