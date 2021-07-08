@@ -1,15 +1,14 @@
+//#include <chrono>
 #include <iostream>
 #include <string>
 
 #include "chip8.h"
 #include "display/display.h"
-#include "display/keys.h"
+#include "display/input_events.h"
 
 constexpr unsigned int SCALING_FACTOR = 20;
 constexpr unsigned int WINDOW_WIDTH = arch::graphics::screen_width * SCALING_FACTOR;
 constexpr unsigned int WINDOW_HEIGHT = arch::graphics::screen_height * SCALING_FACTOR;
-
-KeyPressed keys;
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -24,11 +23,19 @@ int main(int argc, char** argv) {
   Chip8 emulator(rom_path);
 
   while (1) {
-    if (display.stop_rendering()) {
+    const enum input_events::Events inputted_event = display.handle_input();
+
+    if (inputted_event == input_events::Events::quit) {
       break;
     }
 
+    emulator.handle_keys(inputted_event);
+
+    // auto start = std::chrono::steady_clock::now();
     emulator.emulate_cycle();
+    // auto end = std::chrono::steady_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = end - start;
+    // std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
     if (emulator.should_draw()) {
       for (auto x = 0; x < arch::graphics::screen_width; x++) {
@@ -43,9 +50,5 @@ int main(int argc, char** argv) {
       }
       display.render_display();
     }
-
-    keys = display.handle_keyboard();
-
-    emulator.set_keys(keys);
   }
 }

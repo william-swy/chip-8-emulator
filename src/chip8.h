@@ -9,8 +9,7 @@
 #  include "arch/graphics.h"
 #  include "arch/keypad.h"
 #  include "arch/memory.h"
-
-#include "display/keys.h"
+#  include "display/input_events.h"
 
 constexpr std::array<unsigned char, 80> chip8_fontset = {
     0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
@@ -41,7 +40,7 @@ public:
 
   bool get_pixel(unsigned int x, unsigned int y) const;
 
-  void set_keys(KeyPressed& key_state);
+  void handle_keys(input_events::Events key_state);
 
 private:
   arch::CPU cpu;

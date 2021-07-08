@@ -46,116 +46,106 @@ bool Chip8::should_draw() const { return cpu.updated_screen; }
 
 bool Chip8::get_pixel(unsigned int x, unsigned int y) const { return graphics.get_pixel(x, y); }
 
-void Chip8::set_keys(KeyPressed& key_state) {
-  // Check zero
-  if (key_state.zero_pressed) {
-    keypad.press_key(0x0);
-  } else {
-    keypad.release_key(0x0);
-  }
-
-  // Check one
-  if (key_state.one_pressed) {
-    keypad.press_key(0x1);
-  } else {
-    keypad.release_key(0x1);
-  }
-
-  // Check two
-  if (key_state.two_pressed) {
-    keypad.press_key(0x2);
-  } else {
-    keypad.release_key(0x2);
-  }
-
-  // Check three
-  if (key_state.three_pressed) {
-    keypad.press_key(0x3);
-  } else {
-    keypad.release_key(0x3);
-  }
-
-  // Check four
-  if (key_state.four_pressed) {
-    keypad.press_key(0x4);
-  } else {
-    keypad.release_key(0x4);
-  }
-
-  // Check five
-  if (key_state.five_pressed) {
-    keypad.press_key(0x5);
-  } else {
-    keypad.release_key(0x5);
-  }
-
-  // Check six
-  if (key_state.six_pressed) {
-    keypad.press_key(0x6);
-  } else {
-    keypad.release_key(0x6);
-  }
-
-  // Check seven
-  if (key_state.seven_pressed) {
-    keypad.press_key(0x7);
-  } else {
-    keypad.release_key(0x7);
-  }
-
-  // Check eight
-  if (key_state.eight_pressed) {
-    keypad.press_key(0x8);
-  } else {
-    keypad.release_key(0x8);
-  }
-
-  // Check nine
-  if (key_state.nine_pressed) {
-    keypad.press_key(0x9);
-  } else {
-    keypad.release_key(0x9);
-  }
-
-  // Check A
-  if (key_state.a_pressed) {
-    keypad.press_key(0xA);
-  } else {
-    keypad.release_key(0xA);
-  }
-
-  // Check B
-  if (key_state.b_pressed) {
-    keypad.press_key(0xB);
-  } else {
-    keypad.release_key(0xB);
-  }
-
-  // Check C
-  if (key_state.c_pressed) {
-    keypad.press_key(0xC);
-  } else {
-    keypad.release_key(0xC);
-  }
-
-  // Check D
-  if (key_state.d_pressed) {
-    keypad.press_key(0xD);
-  } else {
-    keypad.release_key(0xD);
-  }
-
-  // Check E
-  if (key_state.e_pressed) {
-    keypad.press_key(0xE);
-  } else {
-    keypad.release_key(0xE);
-  }
-
-  // Check F
-  if (key_state.f_pressed) {
-    keypad.press_key(0xF);
-  } else {
-    keypad.release_key(0xF);
+void Chip8::handle_keys(enum input_events::Events key_state) {
+  // A nasty switch
+  switch (key_state) {
+    case input_events::Events::zero_pressed:
+      keypad.press_key(0x0);
+      break;
+    case input_events::Events::one_pressed:
+      keypad.press_key(0x1);
+      break;
+    case input_events::Events::two_pressed:
+      keypad.press_key(0x2);
+      break;
+    case input_events::Events::three_pressed:
+      keypad.press_key(0x3);
+      break;
+    case input_events::Events::four_pressed:
+      keypad.press_key(0x4);
+      break;
+    case input_events::Events::five_pressed:
+      keypad.press_key(0x5);
+      break;
+    case input_events::Events::six_pressed:
+      keypad.press_key(0x6);
+      break;
+    case input_events::Events::seven_pressed:
+      keypad.press_key(0x7);
+      break;
+    case input_events::Events::eight_pressed:
+      keypad.press_key(0x8);
+      break;
+    case input_events::Events::nine_pressed:
+      keypad.press_key(0x9);
+      break;
+    case input_events::Events::a_pressed:
+      keypad.press_key(0xA);
+      break;
+    case input_events::Events::b_pressed:
+      keypad.press_key(0xB);
+      break;
+    case input_events::Events::c_pressed:
+      keypad.press_key(0xC);
+      break;
+    case input_events::Events::d_pressed:
+      keypad.press_key(0xD);
+      break;
+    case input_events::Events::e_pressed:
+      keypad.press_key(0xE);
+      break;
+    case input_events::Events::f_pressed:
+      keypad.press_key(0xF);
+      break;
+    case input_events::Events::zero_released:
+      keypad.release_key(0x0);
+      break;
+    case input_events::Events::one_released:
+      keypad.release_key(0x1);
+      break;
+    case input_events::Events::two_released:
+      keypad.release_key(0x2);
+      break;
+    case input_events::Events::three_released:
+      keypad.release_key(0x3);
+      break;
+    case input_events::Events::four_released:
+      keypad.release_key(0x4);
+      break;
+    case input_events::Events::five_released:
+      keypad.release_key(0x5);
+      break;
+    case input_events::Events::six_released:
+      keypad.release_key(0x6);
+      break;
+    case input_events::Events::seven_released:
+      keypad.release_key(0x7);
+      break;
+    case input_events::Events::eight_released:
+      keypad.release_key(0x8);
+      break;
+    case input_events::Events::nine_released:
+      keypad.release_key(0x9);
+      break;
+    case input_events::Events::a_released:
+      keypad.release_key(0xA);
+      break;
+    case input_events::Events::b_released:
+      keypad.release_key(0xB);
+      break;
+    case input_events::Events::c_released:
+      keypad.release_key(0xC);
+      break;
+    case input_events::Events::d_released:
+      keypad.release_key(0xD);
+      break;
+    case input_events::Events::e_released:
+      keypad.release_key(0xE);
+      break;
+    case input_events::Events::f_released:
+      keypad.release_key(0xF);
+      break;
+    default:
+      break;
   }
 }

@@ -5,8 +5,7 @@
 #include <array>
 #include <memory>
 
-#include "display.h"
-#include "keys.h"
+#include "input_events.h"
 
 class display::Display::sdl_pimpl {
 public:
@@ -14,11 +13,12 @@ public:
     SDL_Init(SDL_INIT_VIDEO);
 
     window = std::unique_ptr<SDL_Window, sdl_deleter>(
-        SDL_CreateWindow("Title", 100, 100, screen_width, screen_height, SDL_WINDOW_SHOWN),
+        SDL_CreateWindow("Title", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width,
+                         screen_height, SDL_WINDOW_SHOWN),
         sdl_deleter());
 
     renderer = std::unique_ptr<SDL_Renderer, sdl_deleter>(
-        SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+        SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED));
   }
 
   ~sdl_pimpl() { SDL_Quit(); }
@@ -38,27 +38,94 @@ public:
 
   void delay(unsigned int milli_sec) const { SDL_Delay(milli_sec); }
 
-  bool stop_rendering() { return SDL_PollEvent(&event) && event.type == SDL_QUIT; }
-
-  KeyPressed handle_keyboard() {
+  enum input_events::Events handle_input() {
     SDL_PollEvent(&event);
+    // some hard coded mappings using the layout shown here
+    // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy2
+    // A nasty switch...
     switch (event.type) {
+      case SDL_QUIT:
+        return input_events::Events::quit;
       case SDL_KEYDOWN:
-        keys[event.key.keysym.sym] = true;
+        switch (event.key.keysym.sym) {
+          case SDLK_x:
+            return input_events::Events::zero_pressed;
+          case SDLK_1:
+            return input_events::Events::one_pressed;
+          case SDLK_2:
+            return input_events::Events::two_pressed;
+          case SDLK_3:
+            return input_events::Events::three_pressed;
+          case SDLK_q:
+            return input_events::Events::four_pressed;
+          case SDLK_w:
+            return input_events::Events::five_pressed;
+          case SDLK_e:
+            return input_events::Events::six_pressed;
+          case SDLK_a:
+            return input_events::Events::seven_pressed;
+          case SDLK_s:
+            return input_events::Events::eight_pressed;
+          case SDLK_d:
+            return input_events::Events::nine_pressed;
+          case SDLK_z:
+            return input_events::Events::a_pressed;
+          case SDLK_c:
+            return input_events::Events::b_pressed;
+          case SDLK_4:
+            return input_events::Events::c_pressed;
+          case SDLK_r:
+            return input_events::Events::d_pressed;
+          case SDLK_f:
+            return input_events::Events::e_pressed;
+          case SDLK_v:
+            return input_events::Events::f_pressed;
+          default:
+            break;
+        }
         break;
       case SDL_KEYUP:
-        keys[event.key.keysym.sym] = false;
+        switch (event.key.keysym.sym) {
+          case SDLK_x:
+            return input_events::Events::zero_released;
+          case SDLK_1:
+            return input_events::Events::one_released;
+          case SDLK_2:
+            return input_events::Events::two_released;
+          case SDLK_3:
+            return input_events::Events::three_released;
+          case SDLK_q:
+            return input_events::Events::four_released;
+          case SDLK_w:
+            return input_events::Events::five_released;
+          case SDLK_e:
+            return input_events::Events::six_released;
+          case SDLK_a:
+            return input_events::Events::seven_released;
+          case SDLK_s:
+            return input_events::Events::eight_released;
+          case SDLK_d:
+            return input_events::Events::nine_released;
+          case SDLK_z:
+            return input_events::Events::a_released;
+          case SDLK_c:
+            return input_events::Events::b_released;
+          case SDLK_4:
+            return input_events::Events::c_released;
+          case SDLK_r:
+            return input_events::Events::d_released;
+          case SDLK_f:
+            return input_events::Events::e_released;
+          case SDLK_v:
+            return input_events::Events::f_released;
+          default:
+            break;
+        }
         break;
       default:
         break;
     }
-
-    // some hard coded mappings using the layout shown here
-    // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy2
-    return KeyPressed{keys[SDLK_x], keys[SDLK_1], keys[SDLK_2], keys[SDLK_3],
-                      keys[SDLK_q], keys[SDLK_w], keys[SDLK_e], keys[SDLK_a],
-                      keys[SDLK_s], keys[SDLK_d], keys[SDLK_z], keys[SDLK_c],
-                      keys[SDLK_4], keys[SDLK_r], keys[SDLK_f], keys[SDLK_v]};
+    return input_events::Events::none;
   }
 
 private:
@@ -102,6 +169,4 @@ void display::Display::render_display() const { p_impl->render_display(); }
 
 void display::Display::delay(unsigned int milli_sec) const { p_impl->delay(milli_sec); }
 
-bool display::Display::stop_rendering() const { return p_impl->stop_rendering(); }
-
-KeyPressed display::Display::handle_keyboard() const { return p_impl->handle_keyboard(); }
+enum input_events::Events display::Display::handle_input() const { return p_impl->handle_input(); }

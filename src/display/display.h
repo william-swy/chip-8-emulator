@@ -4,7 +4,7 @@
 
 #  include <memory>
 
-#  include "keys.h"
+#include "input_events.h"
 
 namespace display {
   class Display {
@@ -29,9 +29,7 @@ namespace display {
 
     void delay(unsigned int milli_sec) const;
 
-    bool stop_rendering() const;
-
-    KeyPressed handle_keyboard() const;
+    enum input_events::Events handle_input() const;
 
   private:
     class sdl_pimpl;
