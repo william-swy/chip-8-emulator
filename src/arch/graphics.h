@@ -1,9 +1,7 @@
 #pragma once
-#ifndef CHIP8EMULATOR_ARCH_GRAPHICS_H_
-#  define CHIP8EMULATOR_ARCH_GRAPHICS_H_
 
-#  include <array>
-#  include <stdexcept>
+#include <array>
+#include <stdexcept>
 
 namespace arch {
   namespace graphics {
@@ -35,4 +33,3 @@ namespace arch {
     std::array<bool, graphics::total_pixels> display_pixels;
   };
 }  // namespace arch
-#endif  // !CHIP8EMULATOR_ARCH_GRAPHICS_H_

@@ -1,9 +1,7 @@
 #pragma once
-#ifndef CHIP8EMULATOR_ARCH_KEYPAD_H_
-#  define CHIP8EMULATOR_ARCH_KEYPAD_H_
 
-#  include <array>
-#  include <stdexcept>
+#include <array>
+#include <stdexcept>
 
 namespace arch {
   namespace keypad {
@@ -28,4 +26,3 @@ namespace arch {
     std::array<bool, keypad::num_of_keys> keys_state;  // State of each key
   };
 }  // namespace arch
-#endif  // !CHIP8EMULATOR_ARCH_KEYPAD_H_

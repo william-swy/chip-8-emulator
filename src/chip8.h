@@ -1,15 +1,13 @@
 #pragma once
-#ifndef CHIP8EMULATOR_CHIP8_H_
-#  define CHIP8EMULATOR_CHIP8_H_
 
-#  include <array>
-#  include <string>
+#include <array>
+#include <string>
 
-#  include "arch/cpu.h"
-#  include "arch/graphics.h"
-#  include "arch/keypad.h"
-#  include "arch/memory.h"
-#  include "display/input_events.h"
+#include "arch/cpu.h"
+#include "arch/graphics.h"
+#include "arch/keypad.h"
+#include "arch/memory.h"
+#include "display/input_events.h"
 
 constexpr std::array<unsigned char, 80> chip8_fontset = {
     0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
@@ -48,5 +46,3 @@ private:
   arch::Keypad keypad;
   arch::Graphics graphics;
 };
-
-#endif  // !CHIP8EMULATOR_CHIP8_H_

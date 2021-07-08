@@ -1,11 +1,9 @@
 #pragma once
-#ifndef CHIP8EMULATOR_ARCH_MEMORY_H_
-#  define CHIP8EMULATOR_ARCH_MEMORY_H_
 
-#  include <array>
-#  include <format>
-#  include <stdexcept>
-#  include <string>
+#include <array>
+#include <format>
+#include <stdexcept>
+#include <string>
 
 namespace arch {
   constexpr size_t mem_size = 4096;                 // Total RAM size in bytes
@@ -32,5 +30,3 @@ namespace arch {
     virtual const char* what() const noexcept { return what_msg.c_str(); }
   };
 }  // namespace arch
-
-#endif  // !CHIP8EMULATOR_ARCH_MEMORY_H_

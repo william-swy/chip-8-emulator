@@ -1,15 +1,13 @@
 #pragma once
-#ifndef CHIP8EMULATOR_ARCH_CPU_H_
-#  define CHIP8EMULATOR_ARCH_CPU_H_
 
-#  include <array>
-#  include <random>
-#  include <stdexcept>
-#  include <string>
+#include <array>
+#include <random>
+#include <stdexcept>
+#include <string>
 
-#  include "graphics.h"
-#  include "keypad.h"
-#  include "memory.h"
+#include "graphics.h"
+#include "keypad.h"
+#include "memory.h"
 
 namespace arch {
   constexpr size_t num_general_reg = 16;            // Number of general purpose registers
@@ -83,5 +81,3 @@ namespace arch {
     }
   };
 }  // namespace arch
-
-#endif  // !CHIP8EMULATOR_ARCH_CPU_H_

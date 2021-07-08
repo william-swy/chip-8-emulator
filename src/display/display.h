@@ -1,8 +1,6 @@
 #pragma once
-#ifndef CHIP8EMULATOR_DISPLAY_DISPLAY_H_
-#  define CHIP8EMULATOR_DISPLAY_DISPLAY_H_
 
-#  include <memory>
+#include <memory>
 
 #include "input_events.h"
 
@@ -37,4 +35,3 @@ namespace display {
     std::unique_ptr<sdl_pimpl> p_impl;
   };
 }  // namespace display
-#endif  // !CHIP8EMULATOR_DISPLAY_DISPLAY_H_
