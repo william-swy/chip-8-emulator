@@ -38,7 +38,7 @@ public:
 
   bool get_pixel(unsigned int x, unsigned int y) const;
 
-  void handle_keys(input_events::Events key_state);
+  void handle_keys(enum input_events::Events key_state);
 
 private:
   arch::CPU cpu;
