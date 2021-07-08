@@ -13,7 +13,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_options(chip8_emulator PUBLIC -Wall -Wpedantic -Wextra -Werror)
 elseif(MSVC)
   target_compile_options(
-    chip8_emulator PUBLIC /Wall /W3 /WX /external:anglebrackets /external:W0 /wd5045
+    chip8_emulator PUBLIC /Wall /W3 /external:anglebrackets /external:W0 /wd5045
   )
 endif()
 

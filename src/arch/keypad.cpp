@@ -7,6 +7,8 @@ void arch::Keypad::press_key(unsigned char key_num) {
     throw arch::keypad::InvalidKey();
   } else {
     keys_state[key_num] = true;
+    key_pressed = true;
+    pressed_key = key_num;
   }
 }
 
@@ -15,6 +17,7 @@ void arch::Keypad::release_key(unsigned char key_num) {
     throw arch::keypad::InvalidKey();
   } else {
     keys_state[key_num] = false;
+    key_pressed = false;
   }
 }
 

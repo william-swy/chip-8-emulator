@@ -346,7 +346,15 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           }
           break;
         case 0x0A:
-          // TODO
+          // Of form FX0A. Wait for key press and store result in register X
+          {
+            if (keypad.key_pressed) {
+              const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+              general_reg[reg_id] = keypad.pressed_key;
+            } else {
+              pc_reg -= 2;
+            }
+          }
           break;
         case 0x15:
           // Of form FX15. Set the delay timer to the value in register X

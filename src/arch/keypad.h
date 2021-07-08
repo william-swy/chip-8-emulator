@@ -22,6 +22,10 @@ namespace arch {
 
     [[nodiscard]] bool is_pressed(unsigned char key_num) const;
 
+    bool key_pressed;
+
+    unsigned char pressed_key;
+
   private:
     std::array<bool, keypad::num_of_keys> keys_state;  // State of each key
   };
