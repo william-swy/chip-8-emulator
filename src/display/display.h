@@ -29,6 +29,10 @@ namespace display {
 
     enum input_events::Events handle_input() const;
 
+    long long get_performance_counter() const noexcept;
+
+    long long get_performance_frequency() const noexcept;
+
   private:
     class sdl_pimpl;
 

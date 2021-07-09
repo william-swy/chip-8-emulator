@@ -34,6 +34,17 @@ public:
     SDL_RenderDrawPoint(renderer.get(), x_pos, y_pos);
   }
 
+  void draw_square(unsigned char red, unsigned char green, unsigned char blue, int x_pos, int y_pos,
+                   unsigned int scaling_factor) const {
+    SDL_SetRenderDrawColor(renderer.get(), red, green, blue, SDL_ALPHA_OPAQUE);
+    SDL_Rect r;
+    r.x = x_pos;
+    r.y = y_pos;
+    r.w = scaling_factor;
+    r.h = scaling_factor;
+    SDL_RenderFillRect(renderer.get(), &r);
+  }
+
   void render_display() const { SDL_RenderPresent(renderer.get()); }
 
   void delay(unsigned int milli_sec) const { SDL_Delay(milli_sec); }
@@ -157,12 +168,8 @@ void display::Display::draw_pixel(unsigned char red, unsigned char green, unsign
 void display::Display::draw_scaled_pixel(unsigned char red, unsigned char green, unsigned char blue,
                                          int original_x_pos, int original_y_pos,
                                          unsigned int scaling_factor) const {
-  for (unsigned int i = 0; i < scaling_factor; i++) {
-    for (unsigned int j = 0; j < scaling_factor; j++) {
-      draw_pixel(red, green, blue, original_x_pos * scaling_factor + i,
-                 original_y_pos * scaling_factor + j);
-    }
-  }
+  p_impl->draw_square(red, green, blue, original_x_pos * scaling_factor,
+                      original_y_pos * scaling_factor, scaling_factor);
 }
 
 void display::Display::render_display() const { p_impl->render_display(); }
@@ -170,3 +177,11 @@ void display::Display::render_display() const { p_impl->render_display(); }
 void display::Display::delay(unsigned int milli_sec) const { p_impl->delay(milli_sec); }
 
 enum input_events::Events display::Display::handle_input() const { return p_impl->handle_input(); }
+
+long long display::Display::get_performance_counter() const noexcept {
+  return SDL_GetPerformanceCounter();
+}
+
+long long display::Display::get_performance_frequency() const noexcept {
+  return SDL_GetPerformanceFrequency();
+}
