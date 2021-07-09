@@ -9,6 +9,23 @@ Figure 1. IBM logo
 ![pong](samples/Pong.gif)
 Figure 2. The game pong
 
+## Keyboard Bindings
+
+Original Chip 8 Key Set
+| 1 | 2 | 3 | C |
+|:-:|:-:|:-:|:-:|
+| 4 | 5 | 6 | D |
+| 7 | 8 | 9 | E |
+| A | 0 | B | F |
+
+Key Set Mapping To A Modern Keyboard
+| 1 | 2 | 3 | 4 |
+|:-:|:-:|:-:|:-:|
+| Q | W | E | R |
+| A | S | D | F |
+| Z | X | C | V |
+
+
 ## Build instructions
 It is recommended to use vcpkg as the package manager as it will easily resolve dependencies. Also an in source build is prohibited as it pollutes the source directory
 
