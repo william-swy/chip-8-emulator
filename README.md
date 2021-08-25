@@ -32,13 +32,13 @@ It is recommended to use vcpkg as the package manager as it will easily resolve 
 With vcpkg
 ```sh
 mkdir build
-cmake -B./build -DCMAKE_TOOL_CHAIN_FILE=<vcpkg_install_dir/scripts/buildsystems/vcpkg.cmake>
+cmake -Bbuild -DCMAKE_TOOL_CHAIN_FILE=<vcpkg_install_dir/scripts/buildsystems/vcpkg.cmake>
 ```
 
 Without vcpkg
 ```sh
 mkdir build
-cmake -B./build
+cmake -Bbuild
 ```
 However the caveat is that you must provide the dependencies. The dependencies can be found in `vcpkg.json`
 
