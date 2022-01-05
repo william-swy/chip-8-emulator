@@ -1,19 +1,18 @@
 #include "graphics.h"
 
-#include <gtest/gtest.h>
-
+#include <catch2/catch.hpp>
 #include <random>
 
-TEST(graphics_test, test_constructor) {
+TEST_CASE("graphics_test_constructor", "[graphics]") {
   const arch::Graphics graphics{};
   for (auto i = 0; i < arch::graphics::screen_width; i++) {
     for (auto j = 0; j < arch::graphics::screen_height; j++) {
-      EXPECT_EQ(graphics.get_pixel(i, j), 0);
+      REQUIRE_FALSE(graphics.get_pixel(i, j));
     }
   }
 }
 
-TEST(graphics_test, test_clear_screen) {
+TEST_CASE("graphics_test_clear_screen", "[graphics]") {
   arch::Graphics graphics{};
 
   const std::string seed_str("RNG seed string");
@@ -24,105 +23,105 @@ TEST(graphics_test, test_clear_screen) {
   std::uniform_int_distribution<size_t> y_pos(0, arch::graphics::screen_height - 1);
 
   for (auto _ = 0; _ < 1000; _++) {
-    graphics.set_pixel(x_pos(gen), y_pos(gen), pixel_val(gen));
+    graphics.set_pixel(x_pos(gen), y_pos(gen), static_cast<bool>(pixel_val(gen)));
   }
 
   graphics.clear_screen();
 
   for (auto i = 0; i < arch::graphics::screen_width; i++) {
     for (auto j = 0; j < arch::graphics::screen_height; j++) {
-      EXPECT_EQ(graphics.get_pixel(i, j), 0);
+      REQUIRE_FALSE(graphics.get_pixel(i, j));
     }
   }
 }
 
-TEST(graphics_test, test_set_get_pixel) {
+TEST_CASE("graphics_test_set_get_pixel", "[graphics]") {
   arch::Graphics graphics{};
 
   graphics.set_pixel(12, 20, true);
-  EXPECT_EQ(graphics.get_pixel(12, 20), true);
+  REQUIRE(graphics.get_pixel(12, 20));
 }
 
-TEST(graphics_test, test_get_pixel_x_out_of_bounds) {
+TEST_CASE("graphics_test_get_pixel_x_out_of_bounds", "[graphics]") {
   arch::Graphics graphics{};
   try {
     graphics.get_pixel(arch::graphics::screen_width, 12);
-    FAIL() << "PixelCoordinateOutOfBounds exception should have been thrown\n";
+    FAIL("PixelCoordinateOutOfBounds exception should have been thrown\n");
   } catch (const arch::graphics::PixelCoordinateOutOfBounds&) {
     SUCCEED();
   }
 }
 
-TEST(graphics_test, test_get_pixel_y_out_of_bounds) {
+TEST_CASE("graphics_test_get_pixel_y_out_of_bounds", "[graphics]") {
   arch::Graphics graphics{};
   try {
     graphics.get_pixel(12, arch::graphics::screen_height);
-    FAIL() << "PixelCoordinateOutOfBounds exception should have been thrown\n";
+    FAIL("PixelCoordinateOutOfBounds exception should have been thrown\n");
   } catch (const arch::graphics::PixelCoordinateOutOfBounds&) {
     SUCCEED();
   }
 }
 
-TEST(graphics_test, test_get_pixel_x_and_y_out_of_bounds) {
+TEST_CASE("graphics_test_get_pixel_x_and_y_out_of_bounds", "[graphics]") {
   arch::Graphics graphics{};
   try {
     graphics.get_pixel(arch::graphics::screen_width, arch::graphics::screen_height);
-    FAIL() << "PixelCoordinateOutOfBounds exception should have been thrown\n";
+    FAIL("PixelCoordinateOutOfBounds exception should have been thrown\n");
   } catch (const arch::graphics::PixelCoordinateOutOfBounds&) {
     SUCCEED();
   }
 }
 
-TEST(graphics_test, test_set_pixel_x_out_of_bounds) {
+TEST_CASE("graphics_test_set_pixel_x_out_of_bounds", "[graphics]") {
   arch::Graphics graphics{};
   try {
     graphics.set_pixel(arch::graphics::screen_width, 20, true);
-    FAIL() << "PixelCoordinateOutOfBounds exception should have been thrown\n";
+    FAIL("PixelCoordinateOutOfBounds exception should have been thrown\n");
   } catch (const arch::graphics::PixelCoordinateOutOfBounds&) {
     SUCCEED();
   }
 }
 
-TEST(graphics_test, test_set_pixel_y_out_of_bounds) {
+TEST_CASE("graphics_test_set_pixel_y_out_of_bounds", "[graphics]") {
   arch::Graphics graphics{};
   try {
     graphics.set_pixel(15, arch::graphics::screen_height, false);
-    FAIL() << "PixelCoordinateOutOfBounds exception should have been thrown\n";
+    FAIL("PixelCoordinateOutOfBounds exception should have been thrown\n");
   } catch (const arch::graphics::PixelCoordinateOutOfBounds&) {
     SUCCEED();
   }
 }
 
-TEST(graphics_test, test_set_pixel_x_and_y_out_of_bounds) {
+TEST_CASE("graphics_test_set_pixel_x_and_y_out_of_bounds", "[graphics]") {
   arch::Graphics graphics{};
   try {
     graphics.set_pixel(arch::graphics::screen_width, arch::graphics::screen_height, true);
-    FAIL() << "PixelCoordinateOutOfBounds exception should have been thrown\n";
+    FAIL("PixelCoordinateOutOfBounds exception should have been thrown\n");
   } catch (const arch::graphics::PixelCoordinateOutOfBounds&) {
     SUCCEED();
   }
 }
 
-TEST(graphics_test, test_draw_pixel_true_true) {
+TEST_CASE("graphics_test_draw_pixel_true_true", "[graphics]") {
   arch::Graphics graphics{};
   graphics.set_pixel(2, 5, true);
-  EXPECT_EQ(graphics.draw_pixel(2, 5, true), true);
+  REQUIRE(graphics.draw_pixel(2, 5, true));
 }
 
-TEST(graphics_test, test_draw_pixel_true_false) {
+TEST_CASE("graphics_test_draw_pixel_true_false", "[graphics]") {
   arch::Graphics graphics{};
   graphics.set_pixel(2, 5, true);
-  EXPECT_EQ(graphics.draw_pixel(2, 5, false), false);
+  REQUIRE_FALSE(graphics.draw_pixel(2, 5, false));
 }
 
-TEST(graphics_test, test_draw_pixel_false_true) {
+TEST_CASE("graphics_test_draw_pixel_false_true", "[graphics]") {
   arch::Graphics graphics{};
   graphics.set_pixel(2, 5, false);
-  EXPECT_EQ(graphics.draw_pixel(2, 5, true), false);
+  REQUIRE_FALSE(graphics.draw_pixel(2, 5, true));
 }
 
-TEST(graphics_test, test_draw_pixel_false_false) {
+TEST_CASE("graphics_test_draw_pixel_false_false", "[graphics]") {
   arch::Graphics graphics{};
   graphics.set_pixel(2, 5, false);
-  EXPECT_EQ(graphics.draw_pixel(2, 5, false), false);
+  REQUIRE_FALSE(graphics.draw_pixel(2, 5, false));
 }

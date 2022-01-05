@@ -1,8 +1,15 @@
 {
-    "name": "chip8emulator",
-    "version-string": "0.1.0",
-    "dependencies": [
-        "gtest",
-        "sdl2"
-    ]
+  "name": "chip8_emulator",
+  "version-string": "0.2.0",
+  "dependencies": [
+    {
+      "name": "catch2",
+      "version>=": "2.13.7"
+    },
+    {
+      "name": "sdl2",
+      "version>=": "2.0.16"
+    }
+  ],
+  "builtin-baseline": "5568f110b509a9fd90711978a7cb76bae75bb092"
 }

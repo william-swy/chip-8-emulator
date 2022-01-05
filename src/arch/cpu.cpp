@@ -410,7 +410,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
             const auto x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
 
             for (auto reg = 0; reg <= x; reg++) {
-              mem.set_value(index_reg + reg, general_reg[reg]);
+              mem.set_value(static_cast<unsigned short>(index_reg + reg), general_reg[reg]);
             }
             index_reg = static_cast<unsigned short>(index_reg + x + 1);
           }
@@ -423,7 +423,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
             const auto x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
 
             for (auto reg = 0; reg <= x; reg++) {
-              general_reg[reg] = mem.get_value(index_reg + reg);
+              general_reg[reg] = mem.get_value(static_cast<unsigned short>(index_reg + reg));
             }
             index_reg = static_cast<unsigned short>(index_reg + x + 1);
           }

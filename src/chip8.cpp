@@ -21,7 +21,7 @@ Chip8::Chip8(std::string& file_name) {
 
   // load program into memory
   for (auto i = 0; i < program_vec.size(); i++) {
-    memory.set_value(cpu.pc_reg + i, program_vec[i]);
+    memory.set_value(static_cast<unsigned short>(cpu.pc_reg + i), program_vec[i]);
   }
 }
 

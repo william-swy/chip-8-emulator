@@ -1,89 +1,92 @@
 #include "cpu.h"
 
-#include <gtest/gtest.h>
-
 #include <array>
+#include <catch2/catch.hpp>
 #include <random>
 
 #include "memory.h"
 
-TEST(cpu_test, get_first_general_reg) {
+TEST_CASE("cpu_get_first_general_reg", "[cpu]") {
   const arch::CPU cpu;
+  constexpr std::size_t first_reg = 0;
   try {
-    const auto curr_reg = cpu.get_general_reg(0);
-    EXPECT_EQ(curr_reg, 0);
+    const auto curr_reg = cpu.get_general_reg(first_reg);
+    REQUIRE(curr_reg == 0);
   } catch (const arch::InvalidRegisterID&) {
-    FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+    FAIL("InvalidRegisterID exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_test, get_last_general_reg) {
+TEST_CASE("cpu_get_last_general_reg", "[cpu]") {
   const arch::CPU cpu;
+  constexpr std::size_t last_reg = 0xF;
   try {
-    const auto curr_reg = cpu.get_general_reg(0xF);
-    EXPECT_EQ(curr_reg, 0);
+    const auto curr_reg = cpu.get_general_reg(last_reg);
+    REQUIRE(curr_reg == 0);
   } catch (const arch::InvalidRegisterID&) {
-    FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+    FAIL("InvalidRegisterID exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_test, get_random_general_reg) {
+TEST_CASE("cpu_get_random_general_reg", "[cpu]") {
   const arch::CPU cpu;
+  constexpr std::size_t first_reg = 0;
+  constexpr std::size_t last_reg = 0xF;
   const std::string seed_str("Definately a random string");
   std::seed_seq seed(seed_str.begin(), seed_str.end());
   std::mt19937 gen(seed);
-  std::uniform_int_distribution<> random_reg(0, 0xF);
+  std::uniform_int_distribution<> random_reg(first_reg, last_reg);
 
   int curr_iter = 0;
   constexpr int max_iter = 10;
 
   while (curr_iter < max_iter) {
-    const auto curr_reg = static_cast<size_t>(random_reg(gen));
+    const auto curr_reg = static_cast<std::size_t>(random_reg(gen));
     try {
       const auto result = cpu.get_general_reg(curr_reg);
-      EXPECT_EQ(result, 0);
+      REQUIRE(result == 0);
     } catch (const arch::InvalidRegisterID&) {
-      FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+      FAIL("InvalidRegisterID exception should not have been thrown\n");
     }
     curr_iter++;
   }
 }
 
-TEST(cpu_test, fail_get_last_reg_out_of_bounds) {
+TEST_CASE("cpu_fail_get_last_reg_out_of_bounds", "[cpu]") {
   const arch::CPU cpu;
   try {
     const auto curr_reg = cpu.get_general_reg(arch::num_general_reg);
-    FAIL() << "InvalidRegisterID exception should have been thrown\n";
+    FAIL("InvalidRegisterID exception should have been thrown\n");
   } catch (const arch::InvalidRegisterID&) {
     SUCCEED();
   }
 }
 
-TEST(cpu_test, set_first_general_reg) {
+TEST_CASE("cpu_set_first_general_reg", "[cpu]") {
   arch::CPU cpu;
   try {
     constexpr unsigned char expected_val = 0xF1;
     cpu.set_general_reg(0, expected_val);
     const auto curr_reg = cpu.get_general_reg(0);
-    EXPECT_EQ(curr_reg, expected_val);
+    REQUIRE(curr_reg == expected_val);
   } catch (const arch::InvalidRegisterID&) {
-    FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+    FAIL("InvalidRegisterID exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_test, set_last_general_reg) {
+TEST_CASE("cpu_set_last_general_reg", "[cpu]") {
   arch::CPU cpu;
   try {
     constexpr unsigned char expected_val = 0xA3;
     cpu.set_general_reg(0xF, expected_val);
     const auto curr_reg = cpu.get_general_reg(0xF);
-    EXPECT_EQ(curr_reg, expected_val);
+    REQUIRE(curr_reg == expected_val);
   } catch (const arch::InvalidRegisterID&) {
-    FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+    FAIL("InvalidRegisterID exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_test, set_random_general_reg) {
+TEST_CASE("cpu_set_random_general_reg", "[cpu]") {
   arch::CPU cpu;
   const std::string seed_str("Definately a random string");
   std::seed_seq seed(seed_str.begin(), seed_str.end());
@@ -100,51 +103,51 @@ TEST(cpu_test, set_random_general_reg) {
     try {
       cpu.set_general_reg(curr_reg, curr_val);
       const auto result = cpu.get_general_reg(curr_reg);
-      EXPECT_EQ(result, curr_val);
+      REQUIRE(result == curr_val);
     } catch (const arch::InvalidRegisterID&) {
-      FAIL() << "InvalidRegisterID exception should not have been thrown\n";
+      FAIL("InvalidRegisterID exception should not have been thrown\n");
     }
     curr_iter++;
   }
 }
 
-TEST(cpu_test, fail_set_last_reg_out_of_bounds) {
+TEST_CASE("cpu_fail_set_last_reg_out_of_bounds", "[cpu]") {
   arch::CPU cpu;
   try {
     cpu.set_general_reg(arch::num_general_reg, 0x11);
-    FAIL() << "InvalidRegisterID exception should have been thrown\n";
+    FAIL("InvalidRegisterID exception should have been thrown\n");
   } catch (const arch::InvalidRegisterID&) {
     SUCCEED();
   }
 }
 
-TEST(cpu_test, fetch_pc_out_of_bounds) {
+TEST_CASE("cpu_fetch_pc_out_of_bounds", "[cpu]") {
   arch::CPU cpu;
   arch::Memory mem;
 
   cpu.pc_reg = arch::max_mem_address + 1;
   try {
     cpu.fetch(mem);
-    FAIL() << "InvalidMemoryAddress exception should have been thrown\n";
+    FAIL("InvalidMemoryAddress exception should have been thrown\n");
   } catch (const arch::InvalidMemoryAddress&) {
     SUCCEED();
   }
 }
 
-TEST(cpu_test, fetch_pc_add_one_out_of_bounds) {
+TEST_CASE("cpu_fetch_pc_add_one_out_of_bounds", "[cpu]") {
   arch::CPU cpu;
   arch::Memory mem;
 
   cpu.pc_reg = arch::max_mem_address;
   try {
     cpu.fetch(mem);
-    FAIL() << "InvalidMemoryAddress exception should have been thrown\n";
+    FAIL("InvalidMemoryAddress exception should have been thrown\n");
   } catch (const arch::InvalidMemoryAddress&) {
     SUCCEED();
   }
 }
 
-TEST(cpu_test, fetch_pc_max_address) {
+TEST_CASE("cpu_fetch_pc_max_address", "[cpu]") {
   arch::CPU cpu;
   arch::Memory mem;
 
@@ -155,14 +158,14 @@ TEST(cpu_test, fetch_pc_max_address) {
   try {
     cpu.fetch(mem);
     // REMEMBER: Big Endian
-    EXPECT_EQ(cpu.curr_opcode, 0x12FA);
-    EXPECT_EQ(cpu.pc_reg, arch::max_mem_address + 1);
+    REQUIRE(cpu.curr_opcode == 0x12FA);
+    REQUIRE(cpu.pc_reg == arch::max_mem_address + 1);
   } catch (const arch::InvalidMemoryAddress&) {
-    FAIL() << "InvalidMemoryAddress exception should hot have been thrown\n";
+    FAIL("InvalidMemoryAddress exception should hot have been thrown\n");
   }
 }
 
-TEST(cpu_test, fetch_pc_min_address) {
+TEST_CASE("cpu_fetch_pc_min_address", "[cpu]") {
   arch::CPU cpu;
   arch::Memory mem;
 
@@ -173,14 +176,14 @@ TEST(cpu_test, fetch_pc_min_address) {
   try {
     cpu.fetch(mem);
     // REMEMBER: Big Endian
-    EXPECT_EQ(cpu.curr_opcode, 0x1001);
-    EXPECT_EQ(cpu.pc_reg, 2);
+    REQUIRE(cpu.curr_opcode == 0x1001);
+    REQUIRE(cpu.pc_reg == 2);
   } catch (const arch::InvalidMemoryAddress&) {
-    FAIL() << "InvalidMemoryAddress exception should hot have been thrown\n";
+    FAIL("InvalidMemoryAddress exception should hot have been thrown\n");
   }
 }
 
-TEST(cpu_test, fetch_many_times) {
+TEST_CASE("cpu_fetch_many_times", "[cpu]") {
   struct TestValues {
     unsigned short pc_address;
     unsigned char biggest_value;
@@ -209,15 +212,15 @@ TEST(cpu_test, fetch_many_times) {
     mem.set_value(static_cast<unsigned short>(val.pc_address + 1), val.smallest_value);
     try {
       cpu.fetch(mem);
-      EXPECT_EQ(cpu.curr_opcode, val.expected_value);
-      EXPECT_EQ(cpu.pc_reg, val.pc_address + 2);
+      REQUIRE(cpu.curr_opcode == val.expected_value);
+      REQUIRE(cpu.pc_reg == val.pc_address + 2);
     } catch (const arch::InvalidMemoryAddress&) {
-      FAIL() << "InvalidMemoryAddress exception should hot have been thrown\n";
+      FAIL("InvalidMemoryAddress exception should hot have been thrown\n");
     }
   }
 }
 
-TEST(cpu_test, fetch_many_random_times) {
+TEST_CASE("cpu_fetch_many_random_times", "[cpu]") {
   struct TestInput {
     unsigned char biggest_value;
     unsigned char smallest_value;
@@ -256,39 +259,39 @@ TEST(cpu_test, fetch_many_random_times) {
     mem.set_value(static_cast<unsigned short>(pc_address + 1), val.smallest_value);
     try {
       cpu.fetch(mem);
-      EXPECT_EQ(cpu.curr_opcode, val.expected_value);
-      EXPECT_EQ(cpu.pc_reg, pc_address + 2);
+      REQUIRE(cpu.curr_opcode == val.expected_value);
+      REQUIRE(cpu.pc_reg == pc_address + 2);
     } catch (const arch::InvalidMemoryAddress&) {
-      FAIL() << "InvalidMemoryAddress exception should hot have been thrown\n";
+      FAIL("InvalidMemoryAddress exception should hot have been thrown\n");
     }
   }
 }
 
-TEST(cpu_test, set_stack_pointer_smallest_val) {
+TEST_CASE("cpu_set_stack_pointer_smallest_val", "[cpu]") {
   arch::CPU cpu;
   try {
     cpu.set_stack_pointer(0);
     SUCCEED();
   } catch (const arch::InvalidStackPointerValue&) {
-    FAIL() << "InvalidStackPointerValue exception should not have been thrown.\n";
+    FAIL("InvalidStackPointerValue exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_test, set_stack_pointer_biggest_val) {
+TEST_CASE("cpu_set_stack_pointer_biggest_val", "[cpu]") {
   arch::CPU cpu;
   try {
     cpu.set_stack_pointer(arch::stack_size - 1);
     SUCCEED();
   } catch (const arch::InvalidStackPointerValue&) {
-    FAIL() << "InvalidStackPointerValue exception should not have been thrown.\n";
+    FAIL("InvalidStackPointerValue exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_test, set_stack_pointer_val_too_big) {
+TEST_CASE("cpu_set_stack_pointer_val_too_big", "[cpu]") {
   arch::CPU cpu;
   try {
     cpu.set_stack_pointer(arch::stack_size);
-    FAIL() << "InvalidStackPointerValue exception should have been thrown.\n";
+    FAIL("InvalidStackPointerValue exception should have been thrown.\n");
   } catch (const arch::InvalidStackPointerValue&) {
     SUCCEED();
   }

@@ -1,6 +1,5 @@
-#include <gtest/gtest.h>
-
 #include <array>
+#include <catch2/catch.hpp>
 #include <random>
 
 #include "cpu.h"
@@ -8,7 +7,7 @@
 #include "keypad.h"
 #include "memory.h"
 
-TEST(cpu_opcode_test, execute_instruction_ANNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_ANNN_once", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -18,13 +17,13 @@ TEST(cpu_opcode_test, execute_instruction_ANNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.index_reg, 0x0123);
+    REQUIRE(cpu.index_reg == 0x0123);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_ANNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_ANNN_many_times", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -51,14 +50,14 @@ TEST(cpu_opcode_test, execute_instruction_ANNN_many_times) {
     cpu.curr_opcode = val.opcode;
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.index_reg, val.expected);
+      REQUIRE(cpu.index_reg == val.expected);
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_BNNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_BNNN_once", "[opcode]") {
   arch::CPU cpu;
   arch::Memory mem;
   arch::Graphics graphics{};
@@ -69,13 +68,13 @@ TEST(cpu_opcode_test, execute_instruction_BNNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x0234 + 0xF1);
+    REQUIRE(cpu.pc_reg == 0x0234 + 0xF1);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_BNNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_BNNN_many_times", "[opcode]") {
   struct TestValues {
     unsigned char reg_v0;
     unsigned short opcode;
@@ -104,16 +103,16 @@ TEST(cpu_opcode_test, execute_instruction_BNNN_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.pc_reg, val.expected_address
+      REQUIRE(cpu.pc_reg == val.expected_address
 
       );
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_1NNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_1NNN_once", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -123,13 +122,13 @@ TEST(cpu_opcode_test, execute_instruction_1NNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x0123);
+    REQUIRE(cpu.pc_reg == 0x0123);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_1NNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_1NNN_many_times", "[opcode]") {
   struct TestValues {
     unsigned short opcode;
     unsigned short expected_address;
@@ -155,14 +154,14 @@ TEST(cpu_opcode_test, execute_instruction_1NNN_many_times) {
     try {
       cpu.curr_opcode = val.opcode;
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.pc_reg, val.expected_address);
+      REQUIRE(cpu.pc_reg == val.expected_address);
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_3XNN_once_no_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_3XNN_once_no_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -174,13 +173,13 @@ TEST(cpu_opcode_test, execute_instruction_3XNN_once_no_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x3460);
+    REQUIRE(cpu.pc_reg == 0x3460);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_3XNN_once_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_3XNN_once_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -192,13 +191,13 @@ TEST(cpu_opcode_test, execute_instruction_3XNN_once_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x3460 + 2);
+    REQUIRE(cpu.pc_reg == 0x3460 + 2);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_3XNN_many_assorted_skips) {
+TEST_CASE("cpu_opcode_execute_instruction_3XNN_many_assorted_skips", "[opcode]") {
   struct TestInputs {
     unsigned short start_pc;
     unsigned short opcode;
@@ -230,17 +229,17 @@ TEST(cpu_opcode_test, execute_instruction_3XNN_many_assorted_skips) {
     try {
       cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
-        EXPECT_EQ(cpu.pc_reg, val.start_pc + 2);
+        REQUIRE(cpu.pc_reg == val.start_pc + 2);
       } else {
-        EXPECT_EQ(cpu.pc_reg, val.start_pc);
+        REQUIRE(cpu.pc_reg == val.start_pc);
       }
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_4XNN_once_no_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_4XNN_once_no_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -252,13 +251,13 @@ TEST(cpu_opcode_test, execute_instruction_4XNN_once_no_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x3460);
+    REQUIRE(cpu.pc_reg == 0x3460);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_4XNN_once_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_4XNN_once_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -270,13 +269,13 @@ TEST(cpu_opcode_test, execute_instruction_4XNN_once_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x3460 + 2);
+    REQUIRE(cpu.pc_reg == 0x3460 + 2);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_4XNN_many_assorted_skips) {
+TEST_CASE("cpu_opcode_execute_instruction_4XNN_many_assorted_skips", "[opcode]") {
   struct TestInputs {
     unsigned short start_pc;
     unsigned short opcode;
@@ -308,17 +307,17 @@ TEST(cpu_opcode_test, execute_instruction_4XNN_many_assorted_skips) {
     try {
       cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
-        EXPECT_EQ(cpu.pc_reg, val.start_pc + 2);
+        REQUIRE(cpu.pc_reg == val.start_pc + 2);
       } else {
-        EXPECT_EQ(cpu.pc_reg, val.start_pc);
+        REQUIRE(cpu.pc_reg == val.start_pc);
       }
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, invalid_5000_instruction) {
+TEST_CASE("cpu_opcode_invalid_5000_instruction", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -328,13 +327,13 @@ TEST(cpu_opcode_test, invalid_5000_instruction) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    FAIL() << "InvalidInstruction exception should have been thrown.\n";
+    FAIL("InvalidInstruction exception should have been thrown.\n");
   } catch (const arch::InvalidInstruction&) {
     SUCCEED();
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_5XY0_once_no_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_5XY0_once_no_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -347,13 +346,13 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_once_no_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x300);
+    REQUIRE(cpu.pc_reg == 0x300);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_5XY0_once_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_5XY0_once_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -366,13 +365,13 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_once_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x512 + 0x2);
+    REQUIRE(cpu.pc_reg == 0x512 + 0x2);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_5XY0_many_assorted_skips) {
+TEST_CASE("cpu_opcode_execute_instruction_5XY0_many_assorted_skips", "[opcode]") {
   struct TestInputs {
     unsigned short opcode;
     unsigned short curr_pc;
@@ -407,18 +406,18 @@ TEST(cpu_opcode_test, execute_instruction_5XY0_many_assorted_skips) {
     try {
       cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
-        EXPECT_EQ(cpu.pc_reg, val.curr_pc + 2);
+        REQUIRE(cpu.pc_reg == val.curr_pc + 2);
       } else {
-        EXPECT_EQ(cpu.pc_reg, val.curr_pc);
+        REQUIRE(cpu.pc_reg == val.curr_pc);
       }
 
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_6XNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_6XNN_once", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -428,13 +427,13 @@ TEST(cpu_opcode_test, execute_instruction_6XNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x1), 0x23);
+    REQUIRE(cpu.get_general_reg(0x1) == 0x23);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_6XNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_6XNN_many_times", "[opcode]") {
   struct TestInputs {
     unsigned short opcode;
     size_t reg_id;
@@ -464,14 +463,14 @@ TEST(cpu_opcode_test, execute_instruction_6XNN_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_id), val.value);
+      REQUIRE(cpu.get_general_reg(val.reg_id) == val.value);
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_7XNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_7XNN_once", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -482,13 +481,13 @@ TEST(cpu_opcode_test, execute_instruction_7XNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x0), static_cast<unsigned char>(0x10 + 0xF1));
+    REQUIRE(cpu.get_general_reg(0x0) == static_cast<unsigned char>(0x10 + 0xF1));
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_7XNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_7XNN_many_times", "[opcode]") {
   struct TestInputs {
     unsigned short opcode;
     size_t reg_id;
@@ -520,15 +519,15 @@ TEST(cpu_opcode_test, execute_instruction_7XNN_many_times) {
     try {
       cpu.set_general_reg(val.reg_id, val.initial_val);
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_id),
-                static_cast<unsigned char>(val.initial_val + val.add_value));
+      REQUIRE(cpu.get_general_reg(val.reg_id)
+              == static_cast<unsigned char>(val.initial_val + val.add_value));
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, invalid_9000_instruction) {
+TEST_CASE("cpu_opcode_invalid_9000_instruction", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -538,13 +537,13 @@ TEST(cpu_opcode_test, invalid_9000_instruction) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    FAIL() << "InvalidInstruction exception should have been thrown.\n";
+    FAIL("InvalidInstruction exception should have been thrown.\n");
   } catch (const arch::InvalidInstruction&) {
     SUCCEED();
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_9XY0_once_no_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_9XY0_once_no_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -557,13 +556,13 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_once_no_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x300);
+    REQUIRE(cpu.pc_reg == 0x300);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_9XY0_once_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_9XY0_once_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -576,13 +575,13 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_once_skip) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x512 + 0x2);
+    REQUIRE(cpu.pc_reg == 0x512 + 0x2);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_9XY0_many_assorted_skips) {
+TEST_CASE("cpu_opcode_execute_instruction_9XY0_many_assorted_skips", "[opcode]") {
   struct TestInputs {
     unsigned short opcode;
     unsigned short curr_pc;
@@ -617,18 +616,18 @@ TEST(cpu_opcode_test, execute_instruction_9XY0_many_assorted_skips) {
     try {
       cpu.decode_execute(mem, graphics, keypad);
       if (val.should_skip) {
-        EXPECT_EQ(cpu.pc_reg, val.curr_pc + 2);
+        REQUIRE(cpu.pc_reg == val.curr_pc + 2);
       } else {
-        EXPECT_EQ(cpu.pc_reg, val.curr_pc);
+        REQUIRE(cpu.pc_reg == val.curr_pc);
       }
 
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_CXNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_CXNN_once", "[opcode]") {
   // We can mimic the random number generator
   const std::string seed_str("RNG seed string");
   const std::seed_seq seed(seed_str.begin(), seed_str.end());
@@ -644,14 +643,14 @@ TEST(cpu_opcode_test, execute_instruction_CXNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(1), static_cast<unsigned char>(rng(gen) & 0xFF));
+    REQUIRE(cpu.get_general_reg(1) == static_cast<unsigned char>(rng(gen) & 0xFF));
 
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+    FAIL("InvalidInstruction exception should not have been thrown.\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_CXNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_CXNN_many_times", "[opcode]") {
   // We can mimic the random number generator
   const std::string seed_str("RNG seed string");
   const std::seed_seq seed(seed_str.begin(), seed_str.end());
@@ -680,15 +679,15 @@ TEST(cpu_opcode_test, execute_instruction_CXNN_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_id), static_cast<unsigned char>(rng(gen) & val.mask));
+      REQUIRE(cpu.get_general_reg(val.reg_id) == static_cast<unsigned char>(rng(gen) & val.mask));
 
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown.\n";
+      FAIL("InvalidInstruction exception should not have been thrown.\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_2NNN_once) {
+TEST_CASE("cpu_opcode_execute_instruction_2NNN_once", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -699,15 +698,15 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x04F2);
-    EXPECT_EQ(cpu.get_stack_pointer(), 1);
-    EXPECT_EQ(cpu.get_stack(), 0x200);
+    REQUIRE(cpu.pc_reg == 0x04F2);
+    REQUIRE(cpu.get_stack_pointer() == 1);
+    REQUIRE(cpu.get_stack() == 0x200);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_2NNN_many_times", "[opcode]") {
   // Simulates starting in the main function which then calls foo1 which calls bar which then calls
   // foo2
 
@@ -732,45 +731,45 @@ TEST(cpu_opcode_test, execute_instruction_2NNN_many_times) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, foo1_address);
-    EXPECT_EQ(cpu.get_stack_pointer(), 1);
-    EXPECT_EQ(cpu.get_stack(), start_pc);
+    REQUIRE(cpu.pc_reg == foo1_address);
+    REQUIRE(cpu.get_stack_pointer() == 1);
+    REQUIRE(cpu.get_stack() == start_pc);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 
   cpu.curr_opcode = call_bar_opcode;
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, bar_address);
-    EXPECT_EQ(cpu.get_stack_pointer(), 2);
+    REQUIRE(cpu.pc_reg == bar_address);
+    REQUIRE(cpu.get_stack_pointer() == 2);
     cpu.set_stack_pointer(1);
-    EXPECT_EQ(cpu.get_stack(), start_pc);
+    REQUIRE(cpu.get_stack() == start_pc);
     cpu.set_stack_pointer(2);
-    EXPECT_EQ(cpu.get_stack(), foo1_address);
+    REQUIRE(cpu.get_stack() == foo1_address);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 
   cpu.curr_opcode = call_foo2_opcode;
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, foo2_address);
-    EXPECT_EQ(cpu.get_stack_pointer(), 3);
+    REQUIRE(cpu.pc_reg == foo2_address);
+    REQUIRE(cpu.get_stack_pointer() == 3);
     cpu.set_stack_pointer(1);
-    EXPECT_EQ(cpu.get_stack(), start_pc);
+    REQUIRE(cpu.get_stack() == start_pc);
     cpu.set_stack_pointer(2);
-    EXPECT_EQ(cpu.get_stack(), foo1_address);
+    REQUIRE(cpu.get_stack() == foo1_address);
     cpu.set_stack_pointer(3);
-    EXPECT_EQ(cpu.get_stack(), bar_address);
+    REQUIRE(cpu.get_stack() == bar_address);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_00EE_once) {
+TEST_CASE("cpu_opcode_execute_instruction_00EE_once", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -783,14 +782,14 @@ TEST(cpu_opcode_test, execute_instruction_00EE_once) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, 0x1234);
-    EXPECT_EQ(cpu.get_stack_pointer(), 0);
+    REQUIRE(cpu.pc_reg == 0x1234);
+    REQUIRE(cpu.get_stack_pointer() == 0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_00EE_many_times", "[opcode]") {
   // Aims to mock the returning from the call from main to foo1 to bar to foo2 i.e. foo2 returns to
   // bar which returns to foo1 which returns to main.
 
@@ -816,32 +815,32 @@ TEST(cpu_opcode_test, execute_instruction_00EE_many_times) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, bar_return_adress);
-    EXPECT_EQ(cpu.get_stack_pointer(), 2);
-    EXPECT_EQ(cpu.get_stack(), foo1_return_adress);
+    REQUIRE(cpu.pc_reg == bar_return_adress);
+    REQUIRE(cpu.get_stack_pointer() == 2);
+    REQUIRE(cpu.get_stack() == foo1_return_adress);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, foo1_return_adress);
-    EXPECT_EQ(cpu.get_stack_pointer(), 1);
-    EXPECT_EQ(cpu.get_stack(), main_return_address);
+    REQUIRE(cpu.pc_reg == foo1_return_adress);
+    REQUIRE(cpu.get_stack_pointer() == 1);
+    REQUIRE(cpu.get_stack() == main_return_address);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.pc_reg, main_return_address);
-    EXPECT_EQ(cpu.get_stack_pointer(), 0);
+    REQUIRE(cpu.pc_reg == main_return_address);
+    REQUIRE(cpu.get_stack_pointer() == 0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY0_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY0_many_times", "[opcode]") {
   struct TestInput {
     unsigned short opcode;
     size_t reg_x;
@@ -868,14 +867,14 @@ TEST(cpu_opcode_test, execute_instruction_8XY0_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_x), val.reg_y_val);
+      REQUIRE(cpu.get_general_reg(val.reg_x) == val.reg_y_val);
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY1_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY1_many_times", "[opcode]") {
   struct TestInput {
     unsigned short opcode;
     size_t reg_x;
@@ -902,15 +901,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY1_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_x),
-                static_cast<unsigned char>(val.reg_y_val | val.reg_x_val));
+      REQUIRE(cpu.get_general_reg(val.reg_x)
+              == static_cast<unsigned char>(val.reg_y_val | val.reg_x_val));
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY2_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY2_many_times", "[opcode]") {
   struct TestInput {
     unsigned short opcode;
     size_t reg_x;
@@ -937,15 +936,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY2_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_x),
-                static_cast<unsigned char>(val.reg_y_val & val.reg_x_val));
+      REQUIRE(cpu.get_general_reg(val.reg_x)
+              == static_cast<unsigned char>(val.reg_y_val & val.reg_x_val));
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY3_many_times) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY3_many_times", "[opcode]") {
   struct TestInput {
     unsigned short opcode;
     size_t reg_x;
@@ -972,15 +971,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY3_many_times) {
 
     try {
       cpu.decode_execute(mem, graphics, keypad);
-      EXPECT_EQ(cpu.get_general_reg(val.reg_x),
-                static_cast<unsigned char>(val.reg_y_val ^ val.reg_x_val));
+      REQUIRE(cpu.get_general_reg(val.reg_x)
+              == static_cast<unsigned char>(val.reg_y_val ^ val.reg_x_val));
     } catch (const arch::InvalidInstruction&) {
-      FAIL() << "InvalidInstruction exception should not have been thrown\n";
+      FAIL("InvalidInstruction exception should not have been thrown\n");
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY4_no_overflow) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY4_no_overflow", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -993,15 +992,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY4_no_overflow) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 + 0x12));
-    EXPECT_EQ(cpu.get_general_reg(0x1), 0x12);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+    REQUIRE(cpu.get_general_reg(0xA) == static_cast<unsigned char>(0x34 + 0x12));
+    REQUIRE(cpu.get_general_reg(0x1) == 0x12);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY4_overflow) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY4_overflow", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1014,15 +1013,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY4_overflow) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xFF + 0x11));
-    EXPECT_EQ(cpu.get_general_reg(0xC), 0x11);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+    REQUIRE(cpu.get_general_reg(0x3) == static_cast<unsigned char>(0xFF + 0x11));
+    REQUIRE(cpu.get_general_reg(0xC) == 0x11);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x1);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY5_no_overflow) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY5_no_overflow", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1035,15 +1034,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_no_overflow) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 - 0x12));
-    EXPECT_EQ(cpu.get_general_reg(0x1), 0x12);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+    REQUIRE(cpu.get_general_reg(0xA) == static_cast<unsigned char>(0x34 - 0x12));
+    REQUIRE(cpu.get_general_reg(0x1) == 0x12);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x1);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY5_overflow) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY5_overflow", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1056,15 +1055,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_overflow) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xA1 - 0xAB));
-    EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+    REQUIRE(cpu.get_general_reg(0x3) == static_cast<unsigned char>(0xA1 - 0xAB));
+    REQUIRE(cpu.get_general_reg(0xC) == 0xAB);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY6_rightmost_zero) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY6_rightmost_zero", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1076,15 +1075,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY6_rightmost_zero) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0xA), 0xA);
-    EXPECT_EQ(cpu.get_general_reg(0x1), 0x14);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+    REQUIRE(cpu.get_general_reg(0xA) == 0xA);
+    REQUIRE(cpu.get_general_reg(0x1) == 0x14);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY5_rightmost_one) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY5_rightmost_one", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1096,15 +1095,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY5_rightmost_one) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x3), 0x55);
-    EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+    REQUIRE(cpu.get_general_reg(0x3) == 0x55);
+    REQUIRE(cpu.get_general_reg(0xC) == 0xAB);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x1);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY7_no_overflow) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY7_no_overflow", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1117,15 +1116,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY7_no_overflow) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0xA), static_cast<unsigned char>(0x34 - 0x12));
-    EXPECT_EQ(cpu.get_general_reg(0x1), 0x34);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+    REQUIRE(cpu.get_general_reg(0xA) == static_cast<unsigned char>(0x34 - 0x12));
+    REQUIRE(cpu.get_general_reg(0x1) == 0x34);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x1);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XY7_overflow) {
+TEST_CASE("cpu_opcode_execute_instruction_8XY7_overflow", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1138,15 +1137,15 @@ TEST(cpu_opcode_test, execute_instruction_8XY7_overflow) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x3), static_cast<unsigned char>(0xA1 - 0xAB));
-    EXPECT_EQ(cpu.get_general_reg(0xC), 0xA1);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+    REQUIRE(cpu.get_general_reg(0x3) == static_cast<unsigned char>(0xA1 - 0xAB));
+    REQUIRE(cpu.get_general_reg(0xC) == 0xA1);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_zero) {
+TEST_CASE("cpu_opcode_execute_instruction_8XYE_leftmost_zero", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1158,15 +1157,15 @@ TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_zero) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0xA), 0x28);
-    EXPECT_EQ(cpu.get_general_reg(0x1), 0x14);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x0);
+    REQUIRE(cpu.get_general_reg(0xA) == 0x28);
+    REQUIRE(cpu.get_general_reg(0x1) == 0x14);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x0);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_one) {
+TEST_CASE("cpu_opcode_execute_instruction_8XYE_leftmost_one", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1178,15 +1177,15 @@ TEST(cpu_opcode_test, execute_instruction_8XYE_leftmost_one) {
 
   try {
     cpu.decode_execute(mem, graphics, keypad);
-    EXPECT_EQ(cpu.get_general_reg(0x3), 0x56);
-    EXPECT_EQ(cpu.get_general_reg(0xC), 0xAB);
-    EXPECT_EQ(cpu.get_general_reg(0xF), 0x1);
+    REQUIRE(cpu.get_general_reg(0x3) == 0x56);
+    REQUIRE(cpu.get_general_reg(0xC) == 0xAB);
+    REQUIRE(cpu.get_general_reg(0xF) == 0x1);
   } catch (const arch::InvalidInstruction&) {
-    FAIL() << "InvalidInstruction exception should not have been thrown\n";
+    FAIL("InvalidInstruction exception should not have been thrown\n");
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_00E0) {
+TEST_CASE("cpu_opcode_execute_instruction_00E0", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1209,12 +1208,12 @@ TEST(cpu_opcode_test, execute_instruction_00E0) {
 
   for (auto i = 0; i < arch::graphics::screen_width; i++) {
     for (auto j = 0; j < arch::graphics::screen_height; j++) {
-      EXPECT_EQ(graphics.get_pixel(i, j), 0);
+      REQUIRE_FALSE(graphics.get_pixel(i, j));
     }
   }
 }
 
-TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_no_collision) {
+TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_no_collision", "[opcode]") {
   std::array<bool, arch::graphics::total_pixels> expected = {};
   // attempt to draw the digit zero.
   // Supposedly looks like this:
@@ -1267,14 +1266,14 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_no_collision) {
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      EXPECT_EQ(graphics.get_pixel(x, y), expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
     }
   }
 
-  EXPECT_EQ(cpu.get_general_reg(0xF), 0);
+  REQUIRE(cpu.get_general_reg(0xF) == 0);
 }
 
-TEST(cpu_opcode_test, execute_instruction_DXYN_width_wrap_around_no_collision) {
+TEST_CASE("cpu_opcode_execute_instruction_DXYN_width_wrap_around_no_collision", "[opcode]") {
   std::array<bool, arch::graphics::total_pixels> expected = {};
   // attempt to draw the digit two.
   // Supposedly looks like this:
@@ -1331,14 +1330,14 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_width_wrap_around_no_collision) {
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      EXPECT_EQ(graphics.get_pixel(x, y), expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
     }
   }
 
-  EXPECT_EQ(cpu.get_general_reg(0xF), 0);
+  REQUIRE(cpu.get_general_reg(0xF) == 0);
 }
 
-TEST(cpu_opcode_test, execute_instruction_DXYN_height_wrap_around_no_collision) {
+TEST_CASE("cpu_opcode_execute_instruction_DXYN_height_wrap_around_no_collision", "[opcode]") {
   std::array<bool, arch::graphics::total_pixels> expected = {};
   // attempt to draw the digit seven.
   // Supposedly looks like this:
@@ -1386,14 +1385,14 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_height_wrap_around_no_collision) 
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      EXPECT_EQ(graphics.get_pixel(x, y), expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
     }
   }
 
-  EXPECT_EQ(cpu.get_general_reg(0xF), 0);
+  REQUIRE(cpu.get_general_reg(0xF) == 0);
 }
 
-TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
+TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_collision", "[opcode]") {
   std::array<bool, arch::graphics::total_pixels> expected = {};
 
   expected[1] = 1;
@@ -1422,14 +1421,14 @@ TEST(cpu_opcode_test, execute_instruction_DXYN_no_wrap_around_collision) {
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      EXPECT_EQ(graphics.get_pixel(x, y), expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
     }
   }
 
-  EXPECT_EQ(cpu.get_general_reg(0xF), 1);
+  REQUIRE(cpu.get_general_reg(0xF) == 1);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX1E) {
+TEST_CASE("cpu_opcode_execute_instruction_FX1E", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1440,20 +1439,20 @@ TEST(cpu_opcode_test, execute_instruction_FX1E) {
   cpu.curr_opcode = 0xF11E;
   cpu.set_general_reg(0x1, 0xAB);
   cpu.decode_execute(mem, graphics, keypad);
-  EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB);
+  REQUIRE(cpu.index_reg == 0x100 + 0xAB);
 
   cpu.curr_opcode = 0xFA1E;
   cpu.set_general_reg(0xA, 0x42);
   cpu.decode_execute(mem, graphics, keypad);
-  EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB + 0x42);
+  REQUIRE(cpu.index_reg == 0x100 + 0xAB + 0x42);
 
   cpu.curr_opcode = 0xF51E;
   cpu.set_general_reg(0x5, 0x1);
   cpu.decode_execute(mem, graphics, keypad);
-  EXPECT_EQ(cpu.index_reg, 0x100 + 0xAB + 0x42 + 0x1);
+  REQUIRE(cpu.index_reg == 0x100 + 0xAB + 0x42 + 0x1);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX29) {
+TEST_CASE("cpu_opcode_execute_instruction_FX29", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1462,20 +1461,20 @@ TEST(cpu_opcode_test, execute_instruction_FX29) {
   cpu.curr_opcode = 0xFF29;
   cpu.set_general_reg(0xF, 0x10);
   cpu.decode_execute(mem, graphics, keypad);
-  EXPECT_EQ(cpu.index_reg, 0);
+  REQUIRE(cpu.index_reg == 0);
 
   cpu.curr_opcode = 0xFA29;
   cpu.set_general_reg(0xA, 0x03);
   cpu.decode_execute(mem, graphics, keypad);
-  EXPECT_EQ(cpu.index_reg, 15);
+  REQUIRE(cpu.index_reg == 15);
 
   cpu.curr_opcode = 0xF329;
   cpu.set_general_reg(0x3, 0x8);
   cpu.decode_execute(mem, graphics, keypad);
-  EXPECT_EQ(cpu.index_reg, 40);
+  REQUIRE(cpu.index_reg == 40);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX33_ones) {
+TEST_CASE("cpu_opcode_execute_instruction_FX33_ones", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1487,12 +1486,12 @@ TEST(cpu_opcode_test, execute_instruction_FX33_ones) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(mem.get_value(cpu.index_reg), 0);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 0);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 5);
+  REQUIRE(mem.get_value(cpu.index_reg) == 0);
+  REQUIRE(mem.get_value(cpu.index_reg + 1) == 0);
+  REQUIRE(mem.get_value(cpu.index_reg + 2) == 5);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX33_tens) {
+TEST_CASE("cpu_opcode_execute_instruction_FX33_tens", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1504,12 +1503,12 @@ TEST(cpu_opcode_test, execute_instruction_FX33_tens) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(mem.get_value(cpu.index_reg), 0);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 3);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 0);
+  REQUIRE(mem.get_value(cpu.index_reg) == 0);
+  REQUIRE(mem.get_value(cpu.index_reg + 1) == 3);
+  REQUIRE(mem.get_value(cpu.index_reg + 2) == 0);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX33_hundreds) {
+TEST_CASE("cpu_opcode_execute_instruction_FX33_hundreds", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1521,12 +1520,12 @@ TEST(cpu_opcode_test, execute_instruction_FX33_hundreds) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(mem.get_value(cpu.index_reg), 2);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 0);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 0);
+  REQUIRE(mem.get_value(cpu.index_reg) == 2);
+  REQUIRE(mem.get_value(cpu.index_reg + 1) == 0);
+  REQUIRE(mem.get_value(cpu.index_reg + 2) == 0);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX33_generic_num) {
+TEST_CASE("cpu_opcode_execute_instruction_FX33_generic_num", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1538,12 +1537,12 @@ TEST(cpu_opcode_test, execute_instruction_FX33_generic_num) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(mem.get_value(cpu.index_reg), 1);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 1), 2);
-  EXPECT_EQ(mem.get_value(cpu.index_reg + 2), 5);
+  REQUIRE(mem.get_value(cpu.index_reg) == 1);
+  REQUIRE(mem.get_value(cpu.index_reg + 1) == 2);
+  REQUIRE(mem.get_value(cpu.index_reg + 2) == 5);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX55) {
+TEST_CASE("cpu_opcode_execute_instruction_FX55", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1558,15 +1557,15 @@ TEST(cpu_opcode_test, execute_instruction_FX55) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(mem.get_value(0x300), 125);
-  EXPECT_EQ(mem.get_value(0x300 + 1), 35);
-  EXPECT_EQ(mem.get_value(0x300 + 2), 70);
-  EXPECT_EQ(mem.get_value(0x300 + 3), 23);
+  REQUIRE(mem.get_value(0x300) == 125);
+  REQUIRE(mem.get_value(0x300 + 1) == 35);
+  REQUIRE(mem.get_value(0x300 + 2) == 70);
+  REQUIRE(mem.get_value(0x300 + 3) == 23);
 
-  EXPECT_EQ(cpu.index_reg, 0x300 + 0x3 + 1);
+  REQUIRE(cpu.index_reg == 0x300 + 0x3 + 1);
 }
 
-TEST(cpu_opcode_test, execute_instruction_FX65) {
+TEST_CASE("cpu_opcode_execute_instruction_FX65", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1584,17 +1583,17 @@ TEST(cpu_opcode_test, execute_instruction_FX65) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(cpu.get_general_reg(0x0), 0x34);
-  EXPECT_EQ(cpu.get_general_reg(0x1), 0xF3);
-  EXPECT_EQ(cpu.get_general_reg(0x2), 0x3C);
-  EXPECT_EQ(cpu.get_general_reg(0x3), 0x1A);
-  EXPECT_EQ(cpu.get_general_reg(0x4), 0xAF);
-  EXPECT_EQ(cpu.get_general_reg(0x5), 0x79);
+  REQUIRE(cpu.get_general_reg(0x0) == 0x34);
+  REQUIRE(cpu.get_general_reg(0x1) == 0xF3);
+  REQUIRE(cpu.get_general_reg(0x2) == 0x3C);
+  REQUIRE(cpu.get_general_reg(0x3) == 0x1A);
+  REQUIRE(cpu.get_general_reg(0x4) == 0xAF);
+  REQUIRE(cpu.get_general_reg(0x5) == 0x79);
 
-  EXPECT_EQ(cpu.index_reg, 0x300 + 0x5 + 1);
+  REQUIRE(cpu.index_reg == 0x300 + 0x5 + 1);
 }
 
-TEST(cpu_opcode_test, execute_instruction_EX9E_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_EX9E_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1608,10 +1607,10 @@ TEST(cpu_opcode_test, execute_instruction_EX9E_skip) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(cpu.pc_reg, 0x200 + 2);
+  REQUIRE(cpu.pc_reg == 0x200 + 2);
 }
 
-TEST(cpu_opcode_test, execute_instruction_EX9E_no_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_EX9E_no_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1625,10 +1624,10 @@ TEST(cpu_opcode_test, execute_instruction_EX9E_no_skip) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(cpu.pc_reg, 0x200);
+  REQUIRE(cpu.pc_reg == 0x200);
 }
 
-TEST(cpu_opcode_test, execute_instruction_EXA1_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_EXA1_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1642,10 +1641,10 @@ TEST(cpu_opcode_test, execute_instruction_EXA1_skip) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(cpu.pc_reg, 0x200 + 2);
+  REQUIRE(cpu.pc_reg == 0x200 + 2);
 }
 
-TEST(cpu_opcode_test, execute_instruction_EXA1_no_skip) {
+TEST_CASE("cpu_opcode_execute_instruction_EXA1_no_skip", "[opcode]") {
   arch::CPU cpu{};
   arch::Memory mem{};
   arch::Graphics graphics{};
@@ -1659,5 +1658,5 @@ TEST(cpu_opcode_test, execute_instruction_EXA1_no_skip) {
 
   cpu.decode_execute(mem, graphics, keypad);
 
-  EXPECT_EQ(cpu.pc_reg, 0x200);
+  REQUIRE(cpu.pc_reg == 0x200);
 }

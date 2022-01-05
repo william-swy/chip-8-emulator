@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # CMake IDE Integration
 CMakeSettings.json
+CMakePresets.json

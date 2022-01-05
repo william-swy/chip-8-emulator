@@ -1,28 +1,29 @@
-enable_testing()
+find_package(Catch2 REQUIRED)
 
-find_package(GTest REQUIRED)
-include(GoogleTest)
+include(CTest)
+include(Catch)
 
-set(TEST_SOURCES "memory_test.cpp" "cpu_test.cpp" "opcode_test.cpp" "graphics_test.cpp"
-                 "keypad_test.cpp"
-)
+# Compiles a static lib from the Catch2 header to shorten the entire build process
+add_library(catch_main STATIC "catch_main.cpp")
+target_link_libraries(catch_main PUBLIC Catch2::Catch2)
+target_link_libraries(catch_main PRIVATE project_options project_warnings)
 
-add_executable(chip8_emulator_tests ${TEST_SOURCES})
+# Test suite
+add_executable(tests "memory_test.cpp" "cpu_test.cpp" "opcode_test.cpp" "graphics_test.cpp"
+                 "keypad_test.cpp")
 
-target_include_directories(chip8_emulator_tests PRIVATE ${GTEST_INCLUDE_DIRS})
+target_link_libraries(tests PRIVATE catch_main project_options project_warnings Arch)
 
-target_link_libraries(chip8_emulator_tests PRIVATE GTest::gtest GTest::gtest_main Arch)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  target_compile_options(chip8_emulator_tests PUBLIC -Wall -Wpedantic -Wextra -Werror)
-elseif(MSVC)
-  # Get \Qspectre warnings to be silenced
-  target_compile_options(
-    chip8_emulator_tests PUBLIC /external:anglebrackets /external:W0 /external:templates- /Wall /W3
-                                /wd5045
-  )
-endif()
-
-target_compile_features(chip8_emulator_tests PRIVATE cxx_std_20)
-
-gtest_discover_tests(chip8_emulator_tests)
+catch_discover_tests(
+  tests
+  TEST_PREFIX
+  "unittests."
+  REPORTER
+  xml
+  OUTPUT_DIR
+  .
+  OUTPUT_PREFIX
+  "unittests."
+  OUTPUT_SUFFIX
+  .xml)
