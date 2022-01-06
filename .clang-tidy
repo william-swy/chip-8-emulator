@@ -1,4 +1,4 @@
-Checks:          '*,-google-*,-modernize-*,clang-analyzer-*,cppcoreguidelines-*,readability-*'
-WarningsAsErrors: '*'
+Checks:          '-*,bugprone-*,modernize-*,-modernize-use-trailing-return-type,clang-analyzer-*,cppcoreguidelines-*,readability-*,performance-*,portability-*'
+WarningsAsErrors: ''
 HeaderFilterRegex: ''
 FormatStyle:     none

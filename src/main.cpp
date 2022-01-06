@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <span>
 
 #include "chip8.h"
 #include "display/display.h"
@@ -10,16 +11,17 @@ constexpr unsigned int WINDOW_WIDTH
     = arch::graphics::screen_width * SCALING_FACTOR;  // Width of screen in px
 constexpr unsigned int WINDOW_HEIGHT
     = arch::graphics::screen_height * SCALING_FACTOR;  // Height of screen in px
-constexpr float ms_per_frame = 1.0f / 60.f * 1000.0f;  // Minimum time per frame
+constexpr float ms_per_frame = 1.0F / 60.F * 1000.0F;  // Minimum time per frame
 
 int main(int argc, char** argv) {
+  const auto args = std::span(argv, std::size_t(argc));
   if (argc != 2) {
-    std::string current_exec_name = argv[0];
+    std::string current_exec_name = args[0];
     std::cout << "Usage: " << current_exec_name << " < path to rom to run > " << std::endl;
     return 1;
   }
 
-  std::string rom_path = argv[1];
+  std::string rom_path = args[1];
 
   display::Display display(WINDOW_WIDTH, WINDOW_HEIGHT);
   Chip8 emulator(rom_path);
@@ -27,7 +29,7 @@ int main(int argc, char** argv) {
   // Performance measurement
   long long time_per_frame_ms = 0;
 
-  while (1) {
+  while (true) {
     auto start = display.get_performance_counter();
 
     const enum input_events::Events inputted_event = display.handle_input();
@@ -56,7 +58,7 @@ int main(int argc, char** argv) {
       time_per_frame_ms += (end - start);
 
       auto elapsed_ms = static_cast<float>(time_per_frame_ms)
-                        / static_cast<float>(display.get_performance_frequency()) * 1000.0f;
+                        / static_cast<float>(display.get_performance_frequency()) * 1000.0F;
       // Cap frame rate if necessary
       if (elapsed_ms < ms_per_frame) {
         display.delay(static_cast<unsigned int>(ms_per_frame - elapsed_ms));

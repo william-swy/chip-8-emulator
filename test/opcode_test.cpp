@@ -58,8 +58,8 @@ TEST_CASE("cpu_opcode_execute_instruction_ANNN_many_times", "[opcode]") {
 }
 
 TEST_CASE("cpu_opcode_execute_instruction_BNNN_once", "[opcode]") {
-  arch::CPU cpu;
-  arch::Memory mem;
+  arch::CPU cpu{};
+  arch::Memory mem{};
   arch::Graphics graphics{};
   arch::Keypad keypad{};
 
@@ -1214,7 +1214,8 @@ TEST_CASE("cpu_opcode_execute_instruction_00E0", "[opcode]") {
 }
 
 TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_no_collision", "[opcode]") {
-  std::array<bool, arch::graphics::total_pixels> expected = {};
+  std::array<std::array<bool, arch::graphics::screen_width>, arch::graphics::screen_height> expected
+      = {};
   // attempt to draw the digit zero.
   // Supposedly looks like this:
   // 11110000 ...
@@ -1231,7 +1232,32 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_no_collision", "[o
   // 0x90
   // 0xF0
 
-  expected[0] = 1;
+  struct PixelCoord {
+    std::size_t x_pos;
+    std::size_t y_pos;
+  };
+
+  constexpr std::size_t num_pixels_on = 14;
+  constexpr std::array<PixelCoord, num_pixels_on> on_pixels{{{0, 0},
+                                                             {0, 1},
+                                                             {0, 2},
+                                                             {0, 3},
+                                                             {1, 0},
+                                                             {1, 3},
+                                                             {2, 0},
+                                                             {2, 3},
+                                                             {3, 0},
+                                                             {3, 3},
+                                                             {4, 0},
+                                                             {4, 1},
+                                                             {4, 2},
+                                                             {4, 3}}};
+
+  for (const auto& coord : on_pixels) {
+    expected.at(coord.x_pos).at(coord.y_pos) = true;
+  }
+
+  /*expected[0] = 1;
   expected[1] = 1;
   expected[2] = 1;
   expected[3] = 1;
@@ -1244,7 +1270,7 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_no_collision", "[o
   expected[4 * arch::graphics::screen_width + 0] = 1;
   expected[4 * arch::graphics::screen_width + 1] = 1;
   expected[4 * arch::graphics::screen_width + 2] = 1;
-  expected[4 * arch::graphics::screen_width + 3] = 1;
+  expected[4 * arch::graphics::screen_width + 3] = 1;*/
 
   arch::CPU cpu{};
   arch::Memory mem{};
@@ -1266,7 +1292,7 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_no_collision", "[o
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected.at(y).at(x));
     }
   }
 
@@ -1274,7 +1300,9 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_no_collision", "[o
 }
 
 TEST_CASE("cpu_opcode_execute_instruction_DXYN_width_wrap_around_no_collision", "[opcode]") {
-  std::array<bool, arch::graphics::total_pixels> expected = {};
+  // std::array<bool, arch::graphics::total_pixels> expected = {};
+  std::array<std::array<bool, arch::graphics::screen_width>, arch::graphics::screen_height> expected
+      = {};
   // attempt to draw the digit two.
   // Supposedly looks like this:
   // 1 ... 1110000 ...
@@ -1291,7 +1319,32 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_width_wrap_around_no_collision", 
   // 0x80
   // 0xF0
 
-  expected[arch::graphics::screen_width - 1] = 1;
+  struct PixelCoord {
+    std::size_t x_pos;
+    std::size_t y_pos;
+  };
+
+  constexpr std::size_t total_on_pixels = 14;
+  std::array<PixelCoord, total_on_pixels> on_pixels{{{0, arch::graphics::screen_width - 1},
+                                                     {0, 0},
+                                                     {0, 1},
+                                                     {0, 2},
+                                                     {1, 2},
+                                                     {2, arch::graphics::screen_width - 1},
+                                                     {2, 0},
+                                                     {2, 1},
+                                                     {2, 2},
+                                                     {3, arch::graphics::screen_width - 1},
+                                                     {4, arch::graphics::screen_width - 1},
+                                                     {4, 0},
+                                                     {4, 1},
+                                                     {4, 2}}};
+
+  for (const auto& coord : on_pixels) {
+    expected.at(coord.x_pos).at(coord.y_pos) = true;
+  }
+
+  /*expected[arch::graphics::screen_width - 1] = 1;
   expected[0] = 1;
   expected[1] = 1;
   expected[2] = 1;
@@ -1308,7 +1361,7 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_width_wrap_around_no_collision", 
   expected[5 * arch::graphics::screen_width - 1] = 1;
   expected[4 * arch::graphics::screen_width + 0] = 1;
   expected[4 * arch::graphics::screen_width + 1] = 1;
-  expected[4 * arch::graphics::screen_width + 2] = 1;
+  expected[4 * arch::graphics::screen_width + 2] = 1;*/
 
   arch::CPU cpu{};
   arch::Memory mem{};
@@ -1330,7 +1383,7 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_width_wrap_around_no_collision", 
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected.at(y).at(x));
     }
   }
 
@@ -1338,7 +1391,8 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_width_wrap_around_no_collision", 
 }
 
 TEST_CASE("cpu_opcode_execute_instruction_DXYN_height_wrap_around_no_collision", "[opcode]") {
-  std::array<bool, arch::graphics::total_pixels> expected = {};
+  std::array<std::array<bool, arch::graphics::screen_width>, arch::graphics::screen_height> expected
+      = {};
   // attempt to draw the digit seven.
   // Supposedly looks like this:
   // 11110000
@@ -1354,16 +1408,38 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_height_wrap_around_no_collision",
   // 0x40
   // 0x40
 
-  expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 1] = 1;
-  expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 2] = 1;
-  expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 3] = 1;
-  expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 4] = 1;
+  struct PixelCoord {
+    std::size_t x_pos;
+    std::size_t y_pos;
+  };
 
-  // wrap around part
-  expected[4] = 1;
-  expected[arch::graphics::screen_width + 3] = 1;
-  expected[2 * arch::graphics::screen_width + 2] = 1;
-  expected[3 * arch::graphics::screen_width + 2] = 1;
+  constexpr std::size_t num_on_pixels = 8;
+  constexpr std::array<PixelCoord, num_on_pixels> on_pixels{{
+
+      {arch::graphics::screen_height - 1, 1},
+      {arch::graphics::screen_height - 1, 2},
+      {arch::graphics::screen_height - 1, 3},
+      {arch::graphics::screen_height - 1, 4},
+      // wrap around part
+      {0, 4},
+      {1, 3},
+      {2, 2},
+      {3, 2}}};
+
+  for (const auto& coord : on_pixels) {
+    expected.at(coord.x_pos).at(coord.y_pos) = true;
+  }
+
+  // expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 1] = 1;
+  // expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 2] = 1;
+  // expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 3] = 1;
+  // expected[(arch::graphics::screen_height - 1) * arch::graphics::screen_width + 4] = 1;
+
+  //// wrap around part
+  // expected[4] = 1;
+  // expected[arch::graphics::screen_width + 3] = 1;
+  // expected[2 * arch::graphics::screen_width + 2] = 1;
+  // expected[3 * arch::graphics::screen_width + 2] = 1;
 
   arch::CPU cpu{};
   arch::Memory mem{};
@@ -1385,7 +1461,7 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_height_wrap_around_no_collision",
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected.at(y).at(x));
     }
   }
 
@@ -1393,12 +1469,20 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_height_wrap_around_no_collision",
 }
 
 TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_collision", "[opcode]") {
-  std::array<bool, arch::graphics::total_pixels> expected = {};
+  std::array<std::array<bool, arch::graphics::screen_width>, arch::graphics::screen_height> expected
+      = {};
 
-  expected[1] = 1;
-  expected[2] = 1;
-  expected[5] = 1;
-  expected[6] = 1;
+  struct PixelCoord {
+    std::size_t x_pos;
+    std::size_t y_pos;
+  };
+
+  constexpr std::size_t num_on_pixels = 4;
+  constexpr std::array<PixelCoord, num_on_pixels> on_pixels{{{0, 1}, {0, 2}, {0, 5}, {0, 6}}};
+
+  for (const auto& coord : on_pixels) {
+    expected.at(coord.x_pos).at(coord.y_pos) = true;
+  }
 
   arch::CPU cpu{};
   arch::Memory mem{};
@@ -1421,7 +1505,7 @@ TEST_CASE("cpu_opcode_execute_instruction_DXYN_no_wrap_around_collision", "[opco
 
   for (auto x = 0; x < arch::graphics::screen_width; x++) {
     for (auto y = 0; y < arch::graphics::screen_height; y++) {
-      REQUIRE(graphics.get_pixel(x, y) == expected[y * arch::graphics::screen_width + x]);
+      REQUIRE(graphics.get_pixel(x, y) == expected.at(y).at(x));
     }
   }
 

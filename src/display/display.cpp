@@ -13,7 +13,7 @@ public:
     SDL_Init(SDL_INIT_VIDEO);
 
     window = std::unique_ptr<SDL_Window, sdl_deleter>(
-        SDL_CreateWindow("Title", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width,
+        SDL_CreateWindow("CHIP-8", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width,
                          screen_height, SDL_WINDOW_SHOWN),
         sdl_deleter());
 
@@ -40,8 +40,8 @@ public:
     SDL_Rect r;
     r.x = x_pos;
     r.y = y_pos;
-    r.w = scaling_factor;
-    r.h = scaling_factor;
+    r.w = static_cast<int>(scaling_factor);
+    r.h = static_cast<int>(scaling_factor);
     SDL_RenderFillRect(renderer.get(), &r);
   }
 
@@ -145,9 +145,9 @@ private:
     void operator()(SDL_Renderer* ptr) const { SDL_DestroyRenderer(ptr); };
   };
 
-  SDL_Event event;
+  SDL_Event event{};
 
-  std::array<bool, 322> keys;
+  std::array<bool, 322> keys{};
 
   std::unique_ptr<SDL_Window, sdl_deleter> window;
 
@@ -168,8 +168,9 @@ void display::Display::draw_pixel(unsigned char red, unsigned char green, unsign
 void display::Display::draw_scaled_pixel(unsigned char red, unsigned char green, unsigned char blue,
                                          int original_x_pos, int original_y_pos,
                                          unsigned int scaling_factor) const {
-  p_impl->draw_square(red, green, blue, original_x_pos * scaling_factor,
-                      original_y_pos * scaling_factor, scaling_factor);
+  p_impl->draw_square(red, green, blue, original_x_pos * static_cast<int>(scaling_factor),
+                      original_y_pos * static_cast<int>(scaling_factor),
+                      static_cast<int>(scaling_factor));
 }
 
 void display::Display::render_display() const { p_impl->render_display(); }
@@ -179,9 +180,9 @@ void display::Display::delay(unsigned int milli_sec) const { p_impl->delay(milli
 enum input_events::Events display::Display::handle_input() const { return p_impl->handle_input(); }
 
 long long display::Display::get_performance_counter() const noexcept {
-  return SDL_GetPerformanceCounter();
+  return static_cast<long long>(SDL_GetPerformanceCounter());
 }
 
 long long display::Display::get_performance_frequency() const noexcept {
-  return SDL_GetPerformanceFrequency();
+  return static_cast<long long>(SDL_GetPerformanceFrequency());
 }

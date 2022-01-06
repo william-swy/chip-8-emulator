@@ -87,7 +87,7 @@ TEST_CASE("cpu_set_last_general_reg", "[cpu]") {
 }
 
 TEST_CASE("cpu_set_random_general_reg", "[cpu]") {
-  arch::CPU cpu;
+  arch::CPU cpu{};
   const std::string seed_str("Definately a random string");
   std::seed_seq seed(seed_str.begin(), seed_str.end());
   std::mt19937 gen(seed);
@@ -112,7 +112,7 @@ TEST_CASE("cpu_set_random_general_reg", "[cpu]") {
 }
 
 TEST_CASE("cpu_fail_set_last_reg_out_of_bounds", "[cpu]") {
-  arch::CPU cpu;
+  arch::CPU cpu{};
   try {
     cpu.set_general_reg(arch::num_general_reg, 0x11);
     FAIL("InvalidRegisterID exception should have been thrown\n");
@@ -122,8 +122,8 @@ TEST_CASE("cpu_fail_set_last_reg_out_of_bounds", "[cpu]") {
 }
 
 TEST_CASE("cpu_fetch_pc_out_of_bounds", "[cpu]") {
-  arch::CPU cpu;
-  arch::Memory mem;
+  arch::CPU cpu{};
+  arch::Memory mem{};
 
   cpu.pc_reg = arch::max_mem_address + 1;
   try {
@@ -148,8 +148,8 @@ TEST_CASE("cpu_fetch_pc_add_one_out_of_bounds", "[cpu]") {
 }
 
 TEST_CASE("cpu_fetch_pc_max_address", "[cpu]") {
-  arch::CPU cpu;
-  arch::Memory mem;
+  arch::CPU cpu{};
+  arch::Memory mem{};
 
   cpu.pc_reg = arch::max_mem_address - 1;
   mem.set_value(arch::max_mem_address, 0xFA);
@@ -166,8 +166,8 @@ TEST_CASE("cpu_fetch_pc_max_address", "[cpu]") {
 }
 
 TEST_CASE("cpu_fetch_pc_min_address", "[cpu]") {
-  arch::CPU cpu;
-  arch::Memory mem;
+  arch::CPU cpu{};
+  arch::Memory mem{};
 
   cpu.pc_reg = 0;
   mem.set_value(0, 0x10);

@@ -2,19 +2,14 @@
 
 #include "memory.h"
 
-arch::CPU::CPU() {
-  index_reg = 0;
-  pc_reg = pc_start_value;
-  sp_reg = 0;
-
-  general_reg.fill(0);
-  delay_timer_reg = 0;
-  sound_timer_reg = 0;
-  stack.fill(0);
-  curr_opcode = 0;
-
-  updated_screen = false;
-
+arch::CPU::CPU()
+    : index_reg(0),
+      pc_reg(pc_start_value),
+      sp_reg(0),
+      delay_timer_reg(0),
+      sound_timer_reg(0),
+      curr_opcode(0),
+      updated_screen(false) {
   const std::string seed_str("RNG seed string");
   const std::seed_seq seed(seed_str.begin(), seed_str.end());
   gen = std::mt19937(seed);
@@ -74,7 +69,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
       // Of form 3XNN. Skips the next instruction if value of register X equals NN
       {
         // Mask to get the register id and bitshift right 8 to remove the two trailing zeros.
-        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
         const auto value = static_cast<unsigned char>(curr_opcode & 0x00FF);
         if (general_reg[reg_id] == value) {
           pc_reg += 2;
@@ -85,7 +80,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
       // Of form 4XNN. Skips the next instruction if the value of register X does not equal NN
       {
         // Mask to get the register id and bitshift right 8 to remove the two trailing zeros.
-        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
         const auto value = static_cast<unsigned char>(curr_opcode & 0x00FF);
         if (general_reg[reg_id] != value) {
           pc_reg += 2;
@@ -98,8 +93,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
       if ((curr_opcode & 0x00F) != 0) {
         throw InvalidInstruction();
       } else {
-        const auto reg_X = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-        const auto reg_Y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+        const auto reg_X = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_Y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
         if (general_reg[reg_X] == general_reg[reg_Y]) {
           pc_reg += 2;
         }
@@ -108,7 +103,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
     case 0x6000:
       // Of form 6XNN. Stores the value NN in the register X
       {
-        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
         const auto value = static_cast<unsigned char>(curr_opcode & 0x00FF);
 
         general_reg[reg_id] = value;
@@ -117,7 +112,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
     case 0x7000:
       // Of form 7XNN. Adds the value of NN in the register X
       {
-        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
         const auto value = static_cast<unsigned char>(curr_opcode & 0x00FF);
         general_reg[reg_id] += value;
       }
@@ -127,8 +122,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x0000:
           // Of form 8XY0. Stores the value of register Y in register X
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             general_reg[reg_x] = general_reg[reg_y];
           }
@@ -136,8 +131,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x0001:
           // Of form 8XY1. Stores the result of register X bitwise OR register Y in register X
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             general_reg[reg_x] = static_cast<unsigned char>(static_cast<int>(general_reg[reg_x])
                                                             | static_cast<int>(general_reg[reg_y]));
@@ -146,8 +141,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x0002:
           // Of form 8XY2. Stores the result of register X bitwise AND register Y in register X
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             general_reg[reg_x] = static_cast<unsigned char>(static_cast<int>(general_reg[reg_x])
                                                             & static_cast<int>(general_reg[reg_y]));
@@ -156,8 +151,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x0003:
           // Of form 8XY3. Stores the result of register X bitwise XOR register Y in register X
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             general_reg[reg_x] = static_cast<unsigned char>(static_cast<int>(general_reg[reg_x])
                                                             ^ static_cast<int>(general_reg[reg_y]));
@@ -167,8 +162,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form 8XY4. Adds the value in register Y to the value in register X. If there is an
           // overflow, register F is set to 0x01. Else register F is set to 0x0.
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
             const auto sum = static_cast<unsigned char>(general_reg[reg_x] + general_reg[reg_y]);
 
             if (sum < general_reg[reg_x]) {
@@ -184,8 +179,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form 8XY5. Adds the value. Subtracts the value of register Y from register X. Set
           // register F to 0 if borrow occurs, otherwise set register F to 1.
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             if (general_reg[reg_x] >= general_reg[reg_y]) {
               general_reg[0xF] = 0x01;
@@ -200,8 +195,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form 8XY6. Stores the value of register Y shifted right one bit in register X.
           // Register F holds the least significant bit of register Y before the shift.
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             general_reg[0xF] = static_cast<unsigned char>(general_reg[reg_y] & 0b00000001);
 
@@ -212,8 +207,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form 8XY7. Stores the value of register Y subtracted by the value of register X in
           // register X. If there is a borrow, register F is set to 0. Else register F is set to 1.
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
             const auto diff = static_cast<unsigned char>(general_reg[reg_y] - general_reg[reg_x]);
 
             if (general_reg[reg_y] >= general_reg[reg_x]) {
@@ -229,8 +224,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form 8XYE. Stores the value of register Y shifted left one bit in register X. Stores
           // the most signficant bit of register Y before the shift in register F.
           {
-            const auto reg_x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-            const auto reg_y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+            const auto reg_x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
 
             general_reg[0xF] = static_cast<unsigned char>((general_reg[reg_y] & 0b10000000) >> 7);
 
@@ -247,8 +242,8 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
       if ((curr_opcode & 0x00F) != 0) {
         throw InvalidInstruction();
       } else {
-        const auto reg_X = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
-        const auto reg_Y = static_cast<size_t>((curr_opcode & 0x00F0) >> 4);
+        const auto reg_X = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_Y = static_cast<std::size_t>((curr_opcode & 0x00F0) >> 4);
         if (general_reg[reg_X] != general_reg[reg_Y]) {
           pc_reg += 2;
         }
@@ -271,7 +266,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
       {
         const auto random_num = static_cast<unsigned>(rng(gen));
         const auto mask = static_cast<unsigned>(curr_opcode & 0x00FF);
-        const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+        const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
 
         general_reg[reg_id] = static_cast<unsigned char>(random_num & mask);
       }
@@ -294,13 +289,13 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           for (auto x = 0; x < 8; x++) {
             const auto val = static_cast<bool>(row_byte & (0x80 >> x));
             const auto result = graphics.draw_pixel(
-                static_cast<size_t>((x_coord + x) % arch::graphics::screen_width),
-                static_cast<size_t>((y_coord + y) % arch::graphics::screen_height), val);
+                static_cast<std::size_t>((x_coord + x) % arch::graphics::screen_width),
+                static_cast<std::size_t>((y_coord + y) % arch::graphics::screen_height), val);
             collision_flag = static_cast<bool>(collision_flag || result);
           }
         }
 
-        general_reg[0xF] = collision_flag;
+        general_reg[0xF] = static_cast<unsigned char>(collision_flag);
 
         updated_screen = true;
       }
@@ -310,7 +305,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x9E:
           // Of form EX9E. Skips the next instruction if the key number in register X is pressed.
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
             try {
               if (keypad.is_pressed(general_reg[reg_id])) {
                 pc_reg += 2;
@@ -323,7 +318,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form EXA1. Skips the next instruction if the key number in register X is not
           // pressed.
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
             try {
               if (!keypad.is_pressed(general_reg[reg_id])) {
                 pc_reg += 2;
@@ -341,7 +336,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x07:
           // Of form FX07. Store the current value of the delay timer in register X
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
             general_reg[reg_id] = delay_timer_reg;
           }
           break;
@@ -349,7 +344,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form FX0A. Wait for key press and store result in register X
           {
             if (keypad.key_pressed) {
-              const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+              const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
               general_reg[reg_id] = keypad.pressed_key;
             } else {
               pc_reg -= 2;
@@ -359,21 +354,21 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
         case 0x15:
           // Of form FX15. Set the delay timer to the value in register X
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
             delay_timer_reg = general_reg[reg_id];
           }
           break;
         case 0x18:
           // Of form FX1E. Set the sound timer to the value in register X
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
             sound_timer_reg = general_reg[reg_id];
           }
           break;
         case 0x1E:
           // Of form FX1E. Adds the value in register X to register I
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
 
             index_reg += general_reg[reg_id];
           }
@@ -382,7 +377,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form FX29. Set the value of register I to the address of the sprite that represents
           // the hexadecimal digit stored in register X.
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
 
             index_reg = (general_reg[reg_id] & 0x0F) * 5;
           }
@@ -392,7 +387,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // is placed at address stored in register I, the tenth digit is placed at 1 + address
           // stored in register I and the ones digit is placed at 2 + address stored in register I.
           {
-            const auto reg_id = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
 
             // Yay floor division
             // truncates the last 2 digits
@@ -407,7 +402,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form FX55. Stores the values from register 0 to register X inclusive starting at the
           // address in register I. Register I is then set to I + X + 1 after the operation.
           {
-            const auto x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
 
             for (auto reg = 0; reg <= x; reg++) {
               mem.set_value(static_cast<unsigned short>(index_reg + reg), general_reg[reg]);
@@ -420,7 +415,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // starting from the address in register I. Register I is then set to I + X + 1 after the
           // operation.
           {
-            const auto x = static_cast<size_t>((curr_opcode & 0x0F00) >> 8);
+            const auto x = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
 
             for (auto reg = 0; reg <= x; reg++) {
               general_reg[reg] = mem.get_value(static_cast<unsigned short>(index_reg + reg));
@@ -439,19 +434,19 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
   }
 }
 
-unsigned char arch::CPU::get_general_reg(size_t reg_id) const {
-  if (reg_id >= num_general_reg) {
+unsigned char arch::CPU::get_general_reg(std::size_t reg_id) const {
+  try {
+    return general_reg.at(reg_id);
+  } catch (const std::out_of_range&) {
     throw InvalidRegisterID();
-  } else {
-    return general_reg[reg_id];
   }
 }
 
-void arch::CPU::set_general_reg(size_t reg_idx, unsigned char value) {
-  if (reg_idx >= num_general_reg) {
+void arch::CPU::set_general_reg(std::size_t reg_id, unsigned char value) {
+  try {
+    general_reg.at(reg_id) = value;
+  } catch (const std::out_of_range&) {
     throw InvalidRegisterID();
-  } else {
-    general_reg[reg_idx] = value;
   }
 }
 
@@ -460,9 +455,8 @@ unsigned short arch::CPU::get_stack_pointer() const { return sp_reg; }
 void arch::CPU::set_stack_pointer(unsigned char value) {
   if (value >= stack_size) {
     throw InvalidStackPointerValue();
-  } else {
-    sp_reg = value;
   }
+  sp_reg = value;
 }
 
 unsigned short arch::CPU::get_stack() const { return stack[sp_reg]; }

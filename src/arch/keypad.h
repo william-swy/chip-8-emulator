@@ -22,11 +22,11 @@ namespace arch {
 
     [[nodiscard]] bool is_pressed(unsigned char key_num) const;
 
-    bool key_pressed;
+    bool key_pressed{false};
 
-    unsigned char pressed_key;
+    unsigned char pressed_key{0};  // This value is only valid if key_pressed is true
 
   private:
-    std::array<bool, keypad::num_of_keys> keys_state;  // State of each key
+    std::array<bool, keypad::num_of_keys> keys_state{};  // State of each key
   };
 }  // namespace arch

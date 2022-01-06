@@ -2,34 +2,32 @@
 
 arch::Graphics::Graphics() { clear_screen(); }
 
-void arch::Graphics::set_pixel(size_t x, size_t y, bool pixel) {
-  if (x >= graphics::screen_width || y >= graphics::screen_height) {
+void arch::Graphics::set_pixel(std::size_t x_pos, std::size_t y_pos, bool pixel) {
+  try {
+    m_display_pixels.at(y_pos).at(x_pos) = pixel;
+  } catch (const std::out_of_range&) {
     throw graphics::PixelCoordinateOutOfBounds();
-  } else {
-    const auto idx = y * graphics::screen_width + x;
-    display_pixels[idx] = pixel;
   }
 }
 
-bool arch::Graphics::get_pixel(size_t x, size_t y) const {
-  if (x >= graphics::screen_width || y >= graphics::screen_height) {
+bool arch::Graphics::get_pixel(std::size_t x_pos, std::size_t y_pos) const {
+  try {
+    return m_display_pixels.at(y_pos).at(x_pos);
+  } catch (const std::out_of_range&) {
     throw graphics::PixelCoordinateOutOfBounds();
-  } else {
-    const auto idx = y * graphics::screen_width + x;
-    return display_pixels[idx];
   }
 }
 
 void arch::Graphics::clear_screen() noexcept {
-  for (auto& pixel : display_pixels) {
-    pixel = false;
+  for (auto& row : m_display_pixels) {
+    row.fill(false);
   }
 }
 
-bool arch::Graphics::draw_pixel(size_t x, size_t y, bool value) {
-  const auto curr_pixel = get_pixel(x, y);
+bool arch::Graphics::draw_pixel(std::size_t x_pos, std::size_t y_pos, bool value) {
+  const auto curr_pixel = get_pixel(x_pos, y_pos);
   const auto new_pixel = (curr_pixel != value);
-  set_pixel(x, y, new_pixel);
+  set_pixel(x_pos, y_pos, new_pixel);
 
   return curr_pixel && (!new_pixel);
 }

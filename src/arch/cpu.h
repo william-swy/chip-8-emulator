@@ -10,8 +10,8 @@
 #include "memory.h"
 
 namespace arch {
-  constexpr size_t num_general_reg = 16;            // Number of general purpose registers
-  constexpr size_t stack_size = 16;                 // Depth of nested subroutine calls
+  constexpr std::size_t num_general_reg = 16;       // Number of general purpose registers
+  constexpr std::size_t stack_size = 16;            // Depth of nested subroutine calls
   constexpr unsigned short pc_start_value = 0x200;  // Initial value of PC when booted
 
   class CPU {
@@ -27,9 +27,9 @@ namespace arch {
     // checking through getter and setter, there is control over the type of exception thrown which
     // allows it to be more description of what the exception is instead of an out of bounds for
     // both scenarios.
-    [[nodiscard]] unsigned char get_general_reg(size_t reg_idx) const;
+    [[nodiscard]] unsigned char get_general_reg(std::size_t reg_idx) const;
 
-    void set_general_reg(size_t reg_idx, unsigned char value);
+    void set_general_reg(std::size_t reg_idx, unsigned char value);
 
     [[nodiscard]] unsigned short get_stack_pointer() const;
 
@@ -51,11 +51,11 @@ namespace arch {
 
   private:
     // Registers
-    std::array<unsigned char, num_general_reg> general_reg;  // General purpose registers 16 8 bit
+    std::array<unsigned char, num_general_reg> general_reg{};  // General purpose registers 16 8 bit
 
     unsigned char sp_reg;  // Stack pointer register 16 bit
     // Stack for storing return addresses
-    std::array<unsigned short, stack_size + 1> stack;  // Meant to store return addresses
+    std::array<unsigned short, stack_size + 1> stack{};  // Meant to store return addresses
 
     // RNG
     std::mt19937 gen;

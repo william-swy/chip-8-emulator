@@ -1,17 +1,17 @@
 #include "memory.h"
 
 unsigned char arch::Memory::get_value(unsigned short address) const {
-  if (address > max_mem_address) {
+  try {
+    return mem.at(address);
+  } catch (const std::out_of_range&) {
     throw InvalidMemoryAddress();
-  } else {
-    return mem[address];
   }
 }
 
 void arch::Memory::set_value(unsigned short address, unsigned char value) {
-  if (address > max_mem_address) {
+  try {
+    mem.at(address) = value;
+  } catch (const std::out_of_range&) {
     throw InvalidMemoryAddress();
-  } else {
-    mem[address] = value;
   }
 }

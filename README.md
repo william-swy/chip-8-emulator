@@ -1,4 +1,5 @@
 # chip-8-emulator
+[![Build status](https://ci.appveyor.com/api/projects/status/en14124l452s7jbx?svg=true)](https://ci.appveyor.com/project/william-swy/chip-8-emulator)
 
 A C++ emulator for Chip8
 
