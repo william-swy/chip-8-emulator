@@ -4,7 +4,6 @@ clone_folder: c:\projects\source
 
 environment:
     BUILD_TYPE: RelWithDebInfo
-    MANAGER: Conan
 
 cache:
   - c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts -> CMakeLists.txt, cmake/Conan.cmake
@@ -15,7 +14,7 @@ build_script:
       choco install opencppcoverage
       $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
       c:\Python38-x64\python.exe -m pip install --user conan
-      cmake -S c:\projects\source -B ./build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=$env:MANAGER
+      cmake -S c:\projects\source -B ./build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=Conan
       cmake --build ./build --config $env:BUILD_TYPE
 
 test_script:
