@@ -4,7 +4,8 @@ clone_folder: c:\projects\source
 
 environment:
     BUILD_TYPE: RelWithDebInfo
-    
+    MANAGER: Conan
+
 cache:
   - c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts -> CMakeLists.txt, cmake/Conan.cmake
   - c:\Users\appveyor\.conan -> CMakeLists.txt, cmake/Conan.cmake
@@ -14,16 +15,16 @@ build_script:
       choco install opencppcoverage
       $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
       c:\Python38-x64\python.exe -m pip install --user conan
-      cmake -S c:\projects\source -B ./build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE
+      cmake -S c:\projects\source -B ./build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=$env:MANAGER
       cmake --build ./build --config $env:BUILD_TYPE
 
 test_script:
   - ps: |
       cd build
       OpenCppCoverage.exe --sources c:\projects\source\src\arch --export_type cobertura:coverage.xml --cover_children -- ctest -C $env:BUILD_TYPE
-      
+
       $ProgressPreference = 'SilentlyContinue'
-      Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc 
+      Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc
       gpg.exe --import codecov.asc
 
       Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
@@ -32,6 +33,6 @@ test_script:
 
       gpg.exe --verify codecov.exe.SHA256SUM.sig codecov.exe.SHA256SUM
       If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { echo "SHASUM verified" } Else {exit 1}
-      
+
       .\codecov.exe -f coverage.xml
-      
+

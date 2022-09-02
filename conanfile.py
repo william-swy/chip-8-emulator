@@ -8,4 +8,4 @@ class CHIP8Emulator(ConanFile):
         "catch2/2.13.7",
         "sdl2/2.0.16@bincrafters/stable",
     )
-    generators = "cmake", "gcc", "txt", "cmake_find_package"
+    generators = "cmake", "cmake_find_package"

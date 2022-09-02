@@ -10,20 +10,17 @@ project(
 # Prohibit in source builds
 include("cmake/prevent_insource.cmake")
 
-# Set a default build type if none was specified
+# Build types
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
   set(CMAKE_BUILD_TYPE
       RelWithDebInfo
-      CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui, ccmake
+      CACHE STRING "Choose the type of build." FORCE
+  )
+
   set_property(
-    CACHE CMAKE_BUILD_TYPE
-    PROPERTY STRINGS
-             "Debug"
-             "Release"
-             "MinSizeRel"
-             "RelWithDebInfo")
+    CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+  )
 endif()
 
 # "library" to add compile options
@@ -47,37 +44,48 @@ option(ENABLE_IPO "Link Time Optimization" OFF)
 
 if(ENABLE_IPO)
   include(CheckIPOSupported)
-  check_ipo_supported(
-    RESULT
-    result
-    OUTPUT
-    output)
-  if(result)
+  check_ipo_supported(RESULT ipo_result OUTPUT ipo_output)
+  if(ipo_result)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
   else()
-    message(SEND_ERROR "IPO is not supported: ${output}")
+    message(SEND_ERROR "IPO is not supported: ${ipo_output}")
   endif()
 endif()
 
-# Recommended to use Conan for dependency management
-option(ENABLE_CONAN "Use Conan for dependency management" ON)
-if(ENABLE_CONAN)
-  include("cmake/Conan.cmake")
-  run_conan()
+if(NOT PACKAGE_MANAGER)
+  message(STATUS "Setting PACKAGE_MANAGER to 'None' as none was specified")
+  set(PACKAGE_MANAGER
+      None
+      CACHE STRING "Choose the package manager." FORCE
+  )
+
+  set_property(CACHE PACKAGE_MANAGER PROPERTY STRINGS "Conan" "vcpkg" "None")
 endif()
 
-# Testing
+message(STATUS "Using package manager: ${PACKAGE_MANAGER}")
+
+if(PACKAGE_MANAGER STREQUAL "Conan")
+  include("cmake/Conan.cmake")
+  run_conan()
+elseif(PACKAGE_MANAGER STREQUAL "vcpkg")
+  if(NOT CMAKE_TOOL_CHAIN_FILE)
+    message(FATAL_ERROR " CMAKE_TOOL_CHAIN_FILE not specified. "
+                        " Provide the value of <vcpkg_install_dir/scripts/buildsystems/vcpkg.cmake>"
+    )
+  endif()
+  if(NOT CMAKE_TOOL_CHAIN_FILE MATCHES ".*/scripts/buildsystems/vcpkg.cmake")
+    message(FATAL_ERROR " CMAKE_TOOL_CHAIN_FILE value invalid. "
+                        " Provide the value of <vcpkg_install_dir/scripts/buildsystems/vcpkg.cmake>"
+    )
+  endif()
+endif()
+
 option(ENABLE_TESTING "Enable Test Builds" ON)
 
 if(ENABLE_TESTING)
   enable_testing()
-  message("Building Tests")
+  message(STATUS "Building Tests")
   add_subdirectory("test")
 endif()
 
-
-# Source code - DUH
 add_subdirectory("src")
-
-
-

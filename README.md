@@ -4,11 +4,8 @@
 A C++ emulator for Chip8
 
 ## Samples
-![IBM-logo](samples/IBM_logo.gif)
-Figure 1. IBM logo
-
 ![pong](samples/Pong.gif)
-Figure 2. The game pong
+Figure 1. The game pong
 
 ## Keyboard Bindings
 
@@ -28,20 +25,27 @@ Key Set Mapping To A Modern Keyboard
 
 
 ## Build instructions
-It is recommended to use vcpkg as the package manager as it will easily resolve dependencies. Also an in source build is prohibited as it pollutes the source directory
+It is recommended to use [Conan](https://github.com/conan-io/conan) as the package manager as it will easily resolve dependencies.
+A vcpkg option is also available.
+
+With Conan
+```sh
+mkdir build
+cmake -B./build -DPACKAGE_MANAGER=Conan
+```
 
 With vcpkg
 ```sh
 mkdir build
-cmake -B./build -DCMAKE_TOOL_CHAIN_FILE=<vcpkg_install_dir/scripts/buildsystems/vcpkg.cmake>
+cmake -B./build -DPACKAGE_MANAGER=vcpkg -DCMAKE_TOOL_CHAIN_FILE=<vcpkg_install_dir/scripts/buildsystems/vcpkg.cmake>
 ```
 
-Without vcpkg
+Without package manager
 ```sh
 mkdir build
 cmake -B./build
 ```
-However the caveat is that you must provide the dependencies. The dependencies can be found in `vcpkg.json`
+However the caveat is that you must provide the dependencies. The dependencies can be found in `vcpkg.json` or `conanfile.py`
 
 ## Run instructions
 The binary `chip8_emulator` is the application that will run and should be used like so: `./chip8_emulator <path to rom to be loaded>`. The `rom` folder in the source directory provides some sample roms that can be tested out.
