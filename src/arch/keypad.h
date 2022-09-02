@@ -5,7 +5,7 @@
 
 namespace arch {
   namespace keypad {
-    constexpr size_t num_of_keys = 16;  // Number of keys
+    constexpr size_t num_of_keys{16};  // Number of keys
 
     class InvalidKey : public std::exception {
     public:

@@ -1,17 +1,17 @@
 #include <iostream>
-#include <string>
 #include <span>
+#include <string>
 
 #include "chip8.h"
 #include "display/display.h"
 #include "display/input_events.h"
 
-constexpr unsigned int SCALING_FACTOR = 20;
-constexpr unsigned int WINDOW_WIDTH
-    = arch::graphics::screen_width * SCALING_FACTOR;  // Width of screen in px
-constexpr unsigned int WINDOW_HEIGHT
-    = arch::graphics::screen_height * SCALING_FACTOR;  // Height of screen in px
-constexpr float ms_per_frame = 1.0F / 60.F * 1000.0F;  // Minimum time per frame
+constexpr unsigned int SCALING_FACTOR{20};
+constexpr unsigned int WINDOW_WIDTH{arch::graphics::screen_width
+                                    * SCALING_FACTOR};  // Width of screen in px
+constexpr unsigned int WINDOW_HEIGHT{arch::graphics::screen_height
+                                     * SCALING_FACTOR};  // Height of screen in px
+constexpr float ms_per_frame{1.0F / 60.F * 1000.0F};     // Minimum time per frame
 
 int main(int argc, char** argv) {
   const auto args = std::span(argv, std::size_t(argc));

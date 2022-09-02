@@ -30,7 +30,7 @@ constexpr std::array<unsigned char, 80> chip8_fontset = {
 
 class Chip8 {
 public:
-  Chip8(std::string& file_name);
+  Chip8(const std::string& file_name);
 
   void emulate_cycle();
 
@@ -41,8 +41,8 @@ public:
   void handle_keys(enum input_events::Events key_state);
 
 private:
-  arch::CPU cpu;
-  arch::Memory memory;
-  arch::Keypad keypad;
-  arch::Graphics graphics;
+  arch::CPU cpu{};
+  arch::Memory memory{};
+  arch::Keypad keypad{};
+  arch::Graphics graphics{};
 };

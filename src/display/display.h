@@ -11,7 +11,6 @@ namespace display {
 
     ~Display();
 
-    // Should not be cloned so disable copy and assignment
     Display(const Display&) = delete;
 
     Display& operator=(const Display&) = delete;

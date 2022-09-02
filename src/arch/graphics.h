@@ -5,8 +5,8 @@
 
 namespace arch {
   namespace graphics {
-    constexpr std::size_t screen_width = 64;   // Number of pixels wide
-    constexpr std::size_t screen_height = 32;  // Number of pixels high
+    constexpr std::size_t screen_width{64};   // Number of pixels wide
+    constexpr std::size_t screen_height{32};  // Number of pixels high
 
     class PixelCoordinateOutOfBounds : public std::exception {
     public:

@@ -4,12 +4,7 @@
 #include <string>
 #include <vector>
 
-Chip8::Chip8(std::string& file_name) {
-  cpu = arch::CPU{};
-  memory = arch::Memory{};
-  keypad = arch::Keypad{};
-  graphics = arch::Graphics{};
-
+Chip8::Chip8(const std::string& file_name) {
   // Load font set into memory
   for (auto i = 0; i < chip8_fontset.size(); i++) {
     memory.set_value(static_cast<unsigned short>(i), chip8_fontset[i]);

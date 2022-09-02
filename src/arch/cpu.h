@@ -10,9 +10,9 @@
 #include "memory.h"
 
 namespace arch {
-  constexpr std::size_t num_general_reg = 16;       // Number of general purpose registers
-  constexpr std::size_t stack_size = 16;            // Depth of nested subroutine calls
-  constexpr unsigned short pc_start_value = 0x200;  // Initial value of PC when booted
+  constexpr std::size_t num_general_reg{16};       // Number of general purpose registers
+  constexpr std::size_t stack_size{16};            // Depth of nested subroutine calls
+  constexpr unsigned short pc_start_value{0x200};  // Initial value of PC when booted
 
   class CPU {
   public:
@@ -40,20 +40,20 @@ namespace arch {
     void set_stack(unsigned short value);
 
     // Current opcode. Meant to be set via fetch and used via decode_execute
-    unsigned short curr_opcode;
+    unsigned short curr_opcode{0};
 
-    unsigned short index_reg;       // Index register 16 bit
-    unsigned short pc_reg;          // Program counter register 16 bit
-    unsigned char delay_timer_reg;  // Delay timer register 8 bits
-    unsigned char sound_timer_reg;  // Sound timer register 8 bits
+    unsigned short index_reg{0};            // Index register 16 bit
+    unsigned short pc_reg{pc_start_value};  // Program counter register 16 bit
+    unsigned char delay_timer_reg{0};       // Delay timer register 8 bits
+    unsigned char sound_timer_reg{0};       // Sound timer register 8 bits
 
-    bool updated_screen;
+    bool updated_screen{false};
 
   private:
     // Registers
     std::array<unsigned char, num_general_reg> general_reg{};  // General purpose registers 16 8 bit
 
-    unsigned char sp_reg;  // Stack pointer register 16 bit
+    unsigned char sp_reg{0};  // Stack pointer register 16 bit
     // Stack for storing return addresses
     std::array<unsigned short, stack_size + 1> stack{};  // Meant to store return addresses
 

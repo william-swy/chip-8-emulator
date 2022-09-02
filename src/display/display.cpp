@@ -154,9 +154,8 @@ private:
   std::unique_ptr<SDL_Renderer, sdl_deleter> renderer;
 };
 
-display::Display::Display(int screen_width, int screen_height) {
-  p_impl = std::make_unique<sdl_pimpl>(screen_width, screen_height);
-}
+display::Display::Display(int screen_width, int screen_height)
+    : p_impl(std::make_unique<sdl_pimpl>(screen_width, screen_height)) {}
 
 display::Display::~Display() = default;
 

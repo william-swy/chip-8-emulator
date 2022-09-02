@@ -2,19 +2,12 @@
 
 #include "memory.h"
 
-arch::CPU::CPU()
-    : index_reg(0),
-      pc_reg(pc_start_value),
-      sp_reg(0),
-      delay_timer_reg(0),
-      sound_timer_reg(0),
-      curr_opcode(0),
-      updated_screen(false) {
+namespace {
   const std::string seed_str("RNG seed string");
   const std::seed_seq seed(seed_str.begin(), seed_str.end());
-  gen = std::mt19937(seed);
-  rng = std::uniform_int_distribution<>(0x00, 0xFF);
-}
+}  // namespace
+
+arch::CPU::CPU() : gen(std::mt19937(seed)), rng(std::uniform_int_distribution<>(0x00, 0xFF)) {}
 
 void arch::CPU::fetch(Memory& mem) {
   // Instructions are 2 bytes, hence need to get current program counter and the next address to
