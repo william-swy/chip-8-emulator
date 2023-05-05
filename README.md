@@ -26,7 +26,7 @@ Key Set Mapping To A Modern Keyboard
 
 ## Build instructions
 It is recommended to use [Conan](https://github.com/conan-io/conan) as the package manager as it will easily resolve dependencies.
-A vcpkg option is also available.
+A vcpkg option is also available. Requires Conan version >= 1.54 but < 2.0
 
 With Conan
 ```sh

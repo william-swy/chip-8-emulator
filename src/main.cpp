@@ -5,6 +5,7 @@
 #include "chip8.h"
 #include "display/display.h"
 #include "display/input_events.h"
+#include "sound.h"
 
 constexpr unsigned int SCALING_FACTOR{20};
 constexpr unsigned int WINDOW_WIDTH{arch::graphics::screen_width
@@ -24,6 +25,7 @@ int main(int argc, char** argv) {
   std::string rom_path = args[1];
 
   display::Display display(WINDOW_WIDTH, WINDOW_HEIGHT);
+  sdl_interface::Audio audio{};
   Chip8 emulator(rom_path);
 
   // Performance measurement
@@ -41,6 +43,12 @@ int main(int argc, char** argv) {
     emulator.handle_keys(inputted_event);
 
     emulator.emulate_cycle();
+
+    if (emulator.should_buzz()) {
+      audio.buzzer_on();
+    } else {
+      audio.buzzer_off();
+    }
 
     if (emulator.should_draw()) {
       for (auto x = 0; x < arch::graphics::screen_width; x++) {

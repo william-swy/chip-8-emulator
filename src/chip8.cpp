@@ -26,18 +26,17 @@ void Chip8::emulate_cycle() {
   cpu.decode_execute(memory, graphics, keypad);
 
   if (cpu.delay_timer_reg > 0) {
-    --cpu.delay_timer_reg;
+    cpu.delay_timer_reg--;
   }
 
   if (cpu.sound_timer_reg > 0) {
-    if (cpu.sound_timer_reg == 1) {
-      // TODO
-    }
-    --cpu.sound_timer_reg;
+    cpu.sound_timer_reg--;
   }
 }
 
 bool Chip8::should_draw() const { return cpu.updated_screen; }
+
+bool Chip8::should_buzz() const { return cpu.sound_timer_reg > 0; }
 
 bool Chip8::get_pixel(unsigned int x, unsigned int y) const { return graphics.get_pixel(x, y); }
 

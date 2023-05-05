@@ -36,6 +36,8 @@ public:
 
   bool should_draw() const;
 
+  bool should_buzz() const;
+
   bool get_pixel(unsigned int x, unsigned int y) const;
 
   void handle_keys(enum input_events::Events key_state);
