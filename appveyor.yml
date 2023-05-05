@@ -13,7 +13,7 @@ build_script:
   - ps: |
       choco install opencppcoverage
       $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
-      c:\Python38-x64\python.exe -m pip install --user conan
+      c:\Python38-x64\python.exe -m pip install --user conan==1.54
       cmake -S c:\projects\source -B ./build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=Conan
       cmake --build ./build --config $env:BUILD_TYPE
 
