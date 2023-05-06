@@ -29,7 +29,7 @@ It is recommended to use [Conan](https://github.com/conan-io/conan) as the packa
 A vcpkg option is also available. 
 
 With Conan
-Requires Conan version [>= 1.55, < 2.0]
+Requires Conan version [>= 1.57, < 2.0]
 ```sh
 mkdir build
 cmake -B./build -DPACKAGE_MANAGER=Conan
