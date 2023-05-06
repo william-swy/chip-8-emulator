@@ -50,12 +50,13 @@ for:
       - image: Ubuntu2004
 
   cache:
-    #- /home/appveyor/.conan -> CMakeLists.txt, cmake/Conan.cmake
+    - /home/appveyor/.conan -> cmakelists.txt, cmake/conan.cmake
 
   install:
     - sh: |
         source $HOME/venv3.8/bin/activate
         python3 -m pip install conan==1.57
+        conan config set tools.system.package_manager:mode=install
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
