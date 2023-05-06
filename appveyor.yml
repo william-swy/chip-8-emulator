@@ -61,6 +61,7 @@ install:
     echo ~
     pwd
     ls
+    mkdir /home/appveyor/.conan
     mv -f appveyor_conan.conf /home/appveyor/.conan/global.conf
 
 test_script:
