@@ -56,15 +56,15 @@ for:
     - sh: |
         source $HOME/venv3.8/bin/activate
         python3 -m pip install conan==1.57
-        conan config list
+        conan config get tools.system.package_manager:mode
         conan config set tools.system.package_manager:mode=install
-        conan config list
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
 
 build_script:
   - ps: |
+      conan config get tools.system.package_manager:mode
       cmake -S . -B ./build -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=Conan
       cmake --build ./build --config $env:BUILD_TYPE
 
