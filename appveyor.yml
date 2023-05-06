@@ -7,62 +7,62 @@ shallow_clone: true
 environment:
     BUILD_TYPE: RelWithDebInfo
 
-for:
-- 
-  matrix:
-    only:
-      - image: Visual Studio 2019
+#for:
+#- 
+#  matrix:
+#    only:
+#      - image: Visual Studio 2019
   
-  clone_folder: c:\projects\myproject
+#  clone_folder: c:\projects\myproject
 
-  cache:
-    - c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts -> CMakeLists.txt, cmake/Conan.cmake
-    - c:\Users\appveyor\.conan -> CMakeLists.txt, cmake/Conan.cmake
+#  cache:
+#    - c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts -> CMakeLists.txt, cmake/Conan.cmake
+#    - c:\Users\appveyor\.conan -> CMakeLists.txt, cmake/Conan.cmake
 
-  install:
-    - ps: |
-        choco install opencppcoverage
-        $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
-        C:\Python38-x64\python.exe -m pip install --upgrade pip
-        c:\Python38-x64\python.exe -m pip install --user conan==1.57
+#  install:
+#    - ps: |
+#        choco install opencppcoverage
+#        $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
+#        C:\Python38-x64\python.exe -m pip install --upgrade pip
+#        c:\Python38-x64\python.exe -m pip install --user conan==1.57
 
-  test_script:
-  - ps: |
-      cd build
-      OpenCppCoverage.exe --sources c:\projects\source\src\arch --export_type cobertura:coverage.xml --cover_children -- ctest -C $env:BUILD_TYPE
+#  test_script:
+#  - ps: |
+#      cd build
+#      OpenCppCoverage.exe --sources c:\projects\source\src\arch --export_type cobertura:coverage.xml --cover_children -- ctest -C $env:BUILD_TYPE
 
-      $ProgressPreference = 'SilentlyContinue'
-      Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc
-      gpg.exe --import codecov.asc
+#      $ProgressPreference = 'SilentlyContinue'
+#      Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc
+#      gpg.exe --import codecov.asc
 
-      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
-      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM -Outfile codecov.exe.SHA256SUM
-      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM.sig -Outfile codecov.exe.SHA256SUM.sig
+#      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
+#      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM -Outfile codecov.exe.SHA256SUM
+#      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM.sig -Outfile codecov.exe.SHA256SUM.sig
 
-      gpg.exe --verify codecov.exe.SHA256SUM.sig codecov.exe.SHA256SUM
-      If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { echo "SHASUM verified" } Else {exit 1}
+#      gpg.exe --verify codecov.exe.SHA256SUM.sig codecov.exe.SHA256SUM
+#      If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { echo "SHASUM verified" } Else {exit 1}
 
-      .\codecov.exe -f coverage.xml
+#      .\codecov.exe -f coverage.xml
 
--
-  matrix:
-    only:
-      - image: Ubuntu2004
+#-
+#  matrix:
+#    only:
+#      - image: Ubuntu2004
 
-  cache:
-    - /home/appveyor/.conan -> cmakelists.txt, cmake/conan.cmake
+cache:
+- /home/appveyor/.conan -> cmakelists.txt, cmake/conan.cmake
 
-  install:
-    - sh: |
-        source $HOME/venv3.8/bin/activate
-        python3 -m pip install conan==1.57
-    - sh: |
-        ls -a /home/appveyor
-        echo ~
-        mv -f /home/appveyor/projects/appveyor_conan.conf /home/appveyor/.conan/global.conf
+install:
+- sh: |
+    source $HOME/venv3.8/bin/activate
+    python3 -m pip install conan==1.57
+- sh: |
+    ls -a /home/appveyor
+    echo ~
+    mv -f /home/appveyor/projects/appveyor_conan.conf /home/appveyor/.conan/global.conf
 
-  test_script:
-  - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
+test_script:
+- ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
 
 build_script:
   - ps: |
