@@ -1,23 +1,31 @@
 image:
   - Visual Studio 2019
-clone_folder: c:\projects\source
+  - Ubuntu2004
+
+shallow_clone: true
 
 environment:
     BUILD_TYPE: RelWithDebInfo
 
-cache:
-  - c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts -> CMakeLists.txt, cmake/Conan.cmake
-  - c:\Users\appveyor\.conan -> CMakeLists.txt, cmake/Conan.cmake
+for:
+- 
+  matrix:
+    only:
+      - image: Visual Studio 2019
+  
+  clone_folder: c:\projects\myproject
 
-build_script:
-  - ps: |
-      choco install opencppcoverage
-      $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
-      c:\Python38-x64\python.exe -m pip install --user conan==1.54
-      cmake -S c:\projects\source -B ./build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=Conan
-      cmake --build ./build --config $env:BUILD_TYPE
+  cache:
+    - c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts -> CMakeLists.txt, cmake/Conan.cmake
+    - c:\Users\appveyor\.conan -> CMakeLists.txt, cmake/Conan.cmake
 
-test_script:
+  install:
+    - ps: |
+        choco install opencppcoverage
+        $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
+        c:\Python38-x64\python.exe -m pip install --user conan==1.54
+
+  test_script:
   - ps: |
       cd build
       OpenCppCoverage.exe --sources c:\projects\source\src\arch --export_type cobertura:coverage.xml --cover_children -- ctest -C $env:BUILD_TYPE
@@ -34,4 +42,26 @@ test_script:
       If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { echo "SHASUM verified" } Else {exit 1}
 
       .\codecov.exe -f coverage.xml
+
+-
+  matrix:
+    only:
+      - image: Ubuntu2004
+
+  install:
+    - ps: $HOME/venv3.8/bin/python3 -m pip install --user conan==1.54
+
+  test_script:
+  - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
+
+build_script:
+  - ps: |
+      cmake -S . -B ./build -DCMAKE_BUILD_TYPE:STRING=$env:BUILD_TYPE -DPACKAGE_MANAGER=Conan
+      cmake --build ./build --config $env:BUILD_TYPE
+
+
+
+      
+
+
 
