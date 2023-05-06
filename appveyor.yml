@@ -50,7 +50,9 @@ for:
       - image: Ubuntu2004
 
   install:
-    - sh: $HOME/venv3.8/bin/python3 -m pip install --user conan==1.54
+    - sh: |
+        source $HOME/venv3.8/bin/activate
+        python3 -m pip install conan==1.54
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
