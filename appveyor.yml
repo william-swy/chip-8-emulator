@@ -1,5 +1,5 @@
 image:
-  - Visual Studio 2019
+  #- Visual Studio 2019
   - Ubuntu2004
 
 shallow_clone: true
@@ -57,9 +57,9 @@ for:
         source $HOME/venv3.8/bin/activate
         python3 -m pip install conan==1.57
     - sh: |
-        rm -f /home/appveyor/.conan/global.conf
-        touch /home/appveyor/.conan/global.conf
-        mv -f appveyor_conan.conf /home/appveyor/.conan/global.conf
+        ls -a /home/appveyor
+        echo ~
+        mv -f /home/appveyor/projects/appveyor_conan.conf /home/appveyor/.conan/global.conf
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
