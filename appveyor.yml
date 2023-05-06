@@ -58,7 +58,7 @@ for:
         python3 -m pip install conan==1.57
     - sh: |
         rm -f /home/appveyor/.conan/global.conf
-        cp appveyor_conan.conf /home/appveyor/.conan/global.conf
+        mv appveyor_conan.conf /home/appveyor/.conan/global.conf
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
