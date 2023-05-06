@@ -6,6 +6,6 @@ class CHIP8Emulator(ConanFile):
     version = "0.2.0"
     requires = (
         "catch2/2.13.7",
-        "sdl2/2.0.16@bincrafters/stable",
+        "sdl2/2.26.1@bincrafters/stable",
     )
     generators = "cmake", "cmake_find_package"
