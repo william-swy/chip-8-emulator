@@ -23,6 +23,7 @@ for:
     - ps: |
         choco install opencppcoverage
         $env:Path = "c:\Users\appveyor\AppData\Roaming\Python\Python38\Scripts;c:\Program Files\OpenCppCoverage;$env:Path"
+        C:\Python38-x64\python.exe -m pip install --upgrade pip
         c:\Python38-x64\python.exe -m pip install --user conan==1.54
 
   test_script:
@@ -49,7 +50,7 @@ for:
       - image: Ubuntu2004
 
   install:
-    - ps: $HOME/venv3.8/bin/python3 -m pip install --user conan==1.54
+    - sh: $HOME/venv3.8/bin/python3 -m pip install --user conan==1.54
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
