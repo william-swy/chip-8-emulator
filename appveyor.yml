@@ -56,7 +56,7 @@ for:
     - sh: |
         source $HOME/venv3.8/bin/activate
         python3 -m pip install conan==1.57
-        conan config set tools.system.package_manager:mode=install
+        conan profile update tools.system.package_manager:mode=install default
 
   test_script:
   - ps: cmake --build ./build --config $env:BUILD_TYPE --target tests
