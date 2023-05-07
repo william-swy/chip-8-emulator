@@ -60,7 +60,7 @@ install:
     python3 -m pip install conan==1.57
 - sh: |
     sudo apt update
-    sudo apt upgrade
+    sudo apt upgrade -y
 - sh: |
     mkdir /home/appveyor/.conan
     mv -f appveyor_conan.conf /home/appveyor/.conan/global.conf
