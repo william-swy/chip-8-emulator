@@ -51,16 +51,17 @@ environment:
 
 cache:
 - /home/appveyor/.conan -> cmakelists.txt, cmake/conan.cmake
+- /home/appveyor/venv3.8.16 -> cmakelists.txt, cmake/conan.cmake
+- /home/appveyor/.cache -> cmakelists.txt, cmake/conan.cmake
 
 install:
 - sh: |
     source $HOME/venv3.8/bin/activate
     python3 -m pip install conan==1.57
 - sh: |
-    ls -a /home/appveyor
-    echo ~
-    pwd
-    ls
+    sudo apt update
+    sudo apt upgrade
+- sh: |
     mkdir /home/appveyor/.conan
     mv -f appveyor_conan.conf /home/appveyor/.conan/global.conf
 
