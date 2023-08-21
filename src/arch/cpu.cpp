@@ -21,7 +21,8 @@ void arch::CPU::fetch(Memory& mem) {
   pc_reg += 2;
 }
 
-void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) {
+void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad,
+                               DelayTimer& delay_timer, SoundTimer& sound_timer) {
   // Parse out first 4 bits
   updated_screen = false;
   switch (curr_opcode & 0xF000) {
@@ -330,7 +331,7 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form FX07. Store the current value of the delay timer in register X
           {
             const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
-            general_reg[reg_id] = delay_timer_reg;
+            general_reg[reg_id] = delay_timer.timer.get_timer_register();
           }
           break;
         case 0x0A:
@@ -348,14 +349,14 @@ void arch::CPU::decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad) 
           // Of form FX15. Set the delay timer to the value in register X
           {
             const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
-            delay_timer_reg = general_reg[reg_id];
+            delay_timer.timer.set_timer_register(general_reg[reg_id]);
           }
           break;
         case 0x18:
           // Of form FX1E. Set the sound timer to the value in register X
           {
             const auto reg_id = static_cast<std::size_t>((curr_opcode & 0x0F00) >> 8);
-            sound_timer_reg = general_reg[reg_id];
+            sound_timer.timer.set_timer_register(general_reg[reg_id]);
           }
           break;
         case 0x1E:

@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <span>
 #include <string>
@@ -12,7 +13,8 @@ constexpr unsigned int WINDOW_WIDTH{arch::graphics::screen_width
                                     * SCALING_FACTOR};  // Width of screen in px
 constexpr unsigned int WINDOW_HEIGHT{arch::graphics::screen_height
                                      * SCALING_FACTOR};  // Height of screen in px
-constexpr float ms_per_frame{1.0F / 60.F * 1000.0F};     // Minimum time per frame
+
+constexpr std::chrono::microseconds time_per_instruction{1000};
 
 int main(int argc, char** argv) {
   const auto args = std::span(argv, std::size_t(argc));
@@ -28,11 +30,8 @@ int main(int argc, char** argv) {
   sdl_interface::Audio audio{};
   Chip8 emulator(rom_path);
 
-  // Performance measurement
-  long long time_per_frame_ms = 0;
-
   while (true) {
-    auto start = display.get_performance_counter();
+    const auto start_time{std::chrono::steady_clock::now()};
 
     const enum input_events::Events inputted_event = display.handle_input();
 
@@ -62,20 +61,12 @@ int main(int argc, char** argv) {
         }
       }
       display.render_display();
-      auto end = display.get_performance_counter();
-      time_per_frame_ms += (end - start);
+    }
+    const auto end_time{std::chrono::steady_clock::now()};
 
-      auto elapsed_ms = static_cast<float>(time_per_frame_ms)
-                        / static_cast<float>(display.get_performance_frequency()) * 1000.0F;
-      // Cap frame rate if necessary
-      if (elapsed_ms < ms_per_frame) {
-        display.delay(static_cast<unsigned int>(ms_per_frame - elapsed_ms));
-      }
-
-      time_per_frame_ms = 0;  // Reset counter
-    } else {
-      auto end = display.get_performance_counter();
-      time_per_frame_ms += (end - start);
+    const auto elapsed_time{end_time - start_time};
+    if (elapsed_time < time_per_instruction) {
+      std::this_thread::sleep_for(time_per_instruction - elapsed_time);
     }
   }
 }

@@ -4,6 +4,16 @@
 #include <string>
 #include <vector>
 
+namespace {
+  constexpr float delay_timer_frequency_hz{60};
+  constexpr float sound_timer_frequency_hz{60};
+
+  constexpr std::chrono::milliseconds delay_timer_decrement_time{
+      static_cast<int>(1000 / delay_timer_frequency_hz)};
+  constexpr std::chrono::milliseconds sound_timer_decrement_time{
+      static_cast<int>(1000 / sound_timer_frequency_hz)};
+}  // namespace
+
 Chip8::Chip8(const std::string& file_name) {
   // Load font set into memory
   for (auto i = 0; i < chip8_fontset.size(); i++) {
@@ -18,25 +28,20 @@ Chip8::Chip8(const std::string& file_name) {
   for (auto i = 0; i < program_vec.size(); i++) {
     memory.set_value(static_cast<unsigned short>(cpu.pc_reg + i), program_vec[i]);
   }
+
+  delay_timer.timer.start_device(delay_timer_decrement_time);
+  sound_timer.timer.start_device(sound_timer_decrement_time);
 }
 
 void Chip8::emulate_cycle() {
   cpu.fetch(memory);
 
-  cpu.decode_execute(memory, graphics, keypad);
-
-  if (cpu.delay_timer_reg > 0) {
-    cpu.delay_timer_reg--;
-  }
-
-  if (cpu.sound_timer_reg > 0) {
-    cpu.sound_timer_reg--;
-  }
+  cpu.decode_execute(memory, graphics, keypad, delay_timer, sound_timer);
 }
 
 bool Chip8::should_draw() const { return cpu.updated_screen; }
 
-bool Chip8::should_buzz() const { return cpu.sound_timer_reg > 0; }
+bool Chip8::should_buzz() const { return sound_timer.timer.get_timer_register() > 0; }
 
 bool Chip8::get_pixel(unsigned int x, unsigned int y) const { return graphics.get_pixel(x, y); }
 

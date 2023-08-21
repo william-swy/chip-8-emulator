@@ -7,6 +7,7 @@
 #include "arch/graphics.h"
 #include "arch/keypad.h"
 #include "arch/memory.h"
+#include "arch/timer.h"
 #include "display/input_events.h"
 
 constexpr std::array<unsigned char, 80> chip8_fontset = {
@@ -47,4 +48,6 @@ private:
   arch::Memory memory{};
   arch::Keypad keypad{};
   arch::Graphics graphics{};
+  arch::DelayTimer delay_timer{};
+  arch::SoundTimer sound_timer{};
 };

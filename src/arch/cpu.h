@@ -8,6 +8,7 @@
 #include "graphics.h"
 #include "keypad.h"
 #include "memory.h"
+#include "timer.h"
 
 namespace arch {
   constexpr std::size_t num_general_reg{16};       // Number of general purpose registers
@@ -20,7 +21,8 @@ namespace arch {
 
     void fetch(Memory& mem);
 
-    void decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad);
+    void decode_execute(Memory& mem, Graphics& graphics, Keypad& keypad, DelayTimer& delay_timer,
+                        SoundTimer& sound_timer);
 
     // Getters and setters for general registers and stack to make sure that only valid indices are
     // provided. Although they are both std::array which has its own bounds checking, by doing the
@@ -44,8 +46,6 @@ namespace arch {
 
     unsigned short index_reg{0};            // Index register 16 bit
     unsigned short pc_reg{pc_start_value};  // Program counter register 16 bit
-    unsigned char delay_timer_reg{0};       // Delay timer register 8 bits
-    unsigned char sound_timer_reg{0};       // Sound timer register 8 bits
 
     bool updated_screen{false};
 
