@@ -58,11 +58,7 @@ jobs:
 
     - name: Configure Conan
       if: runner.os == 'Linux'
-      run: |
-        touch ~/.conan/global.conf 
-        echo "tools.system.package_manager:mode = install" >> ~/.conan/global.conf
-        echo "tools.system.package_manager:sudo = True" >> ~/.conan/global.conf
-        cat ~/.conan/global.conf
+      run: sudo apt-get install libsdl2-dev
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
