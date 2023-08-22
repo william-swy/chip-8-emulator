@@ -8,8 +8,8 @@ class CHIP8Emulator(ConanFile):
     version = "0.2.0"
     generators = "cmake", "cmake_find_package"
 
-    def package_info(self):
-        self.conf_info.define("tools.system.package_manager:mode", "install");
+    def config_options(self):
+        self.conf_info.define("tools.system.package_manager:mode", "install")
         self.conf_info.define("tools.system.package_manager:sudo", True)
 
     def requirements(self):
